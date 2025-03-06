@@ -10,3 +10,4 @@ public class ServerApplication {
 	}
 
 }
+//TODO: Disable CORS
