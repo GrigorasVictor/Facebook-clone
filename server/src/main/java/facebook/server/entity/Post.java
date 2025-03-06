@@ -1,12 +1,11 @@
 package facebook.server.entity;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "post")
@@ -14,6 +13,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Post {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
@@ -23,15 +23,15 @@ public class Post {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "title")
+    @Column(name = "title", nullable = false)
     @JsonProperty("title")
     private String title;
 
-    @Column(name = "text")
+    @Column(name = "text", columnDefinition = "TEXT")
     @JsonProperty("text")
     private String text;
 
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     @JsonProperty("status")
     private String status;
 
@@ -39,7 +39,18 @@ public class Post {
     @JsonProperty("nr_votes")
     private Integer nrVotes;
 
-    @Column(name = "created_at")
+    @Column(name = "nr_comments")
+    @JsonProperty("nr_comments")
+    private Integer nrComments;
+
+    @Column(name = "url_photo")
+    @JsonProperty("url_photo")
+    private String urlPhoto;
+
+    @ManyToMany(mappedBy = "posts")
+    private List<Tag> tags;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
     @JsonProperty("created_at")
-    private String createdAt;
+    private LocalDateTime createdAt;
 }

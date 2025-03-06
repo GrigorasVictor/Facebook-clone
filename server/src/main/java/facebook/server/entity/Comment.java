@@ -2,10 +2,10 @@ package facebook.server.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "comment")
@@ -13,6 +13,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Comment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "comment_id")
@@ -26,7 +27,7 @@ public class Comment {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "content")
+    @Column(name = "content", nullable = false)
     @JsonProperty("content")
     private String content;
 
@@ -34,7 +35,10 @@ public class Comment {
     @JsonProperty("nr_votes")
     private Integer nrVotes;
 
-    @Column(name = "created_at")
+    @ManyToMany(mappedBy = "comments")
+    private List<Tag> tags;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
     @JsonProperty("created_at")
-    private String createdAt;
+    private LocalDateTime createdAt;
 }

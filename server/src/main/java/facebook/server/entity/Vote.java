@@ -16,7 +16,7 @@ public class Vote {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "vode_id")
+    @Column(name = "vote_id")
     private Long id;
 
     @OneToOne
