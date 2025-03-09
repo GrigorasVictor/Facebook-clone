@@ -1,12 +1,14 @@
 package facebook.server.service;
 
 import facebook.server.repository.UserRepository;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@Getter
 public class UserService {
     @Autowired
     private UserRepository userRepository;
@@ -16,4 +18,6 @@ public class UserService {
     private AuthenticationManager authenticationManager;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private StorageS3Service storageS3Service;
 }

@@ -17,49 +17,49 @@ import java.util.function.Function;
 
 @Component
 public class JWTUtils {
-        private SecretKey Key;
-        private  static  final long EXPIRATION_TIME = 86400000;  //24 hours
+    private SecretKey Key;
+    private static final long EXPIRATION_TIME = 86400000;  //24 hours
 
-        public JWTUtils(){
-            String secreteString = "843567893696976453275974432697R634976R738467TR678T34865R6834R8763T478378637664538745673865783678548735687R3";
-            byte[] keyBytes = Base64.getDecoder().decode(secreteString.getBytes(StandardCharsets.UTF_8));
-            this.Key = new SecretKeySpec(keyBytes, "HmacSHA256");
-        }
+    public JWTUtils() {
+        String secreteString = "843567893696976453275974432697R634976R738467TR678T34865R6834R8763T478378637664538745673865783678548735687R3";
+        byte[] keyBytes = Base64.getDecoder().decode(secreteString.getBytes(StandardCharsets.UTF_8));
+        this.Key = new SecretKeySpec(keyBytes, "HmacSHA256");
+    }
 
-        public String generateToken(UserDetails userDetails){
-            return Jwts.builder()
-                    .subject(userDetails.getUsername())
-                    .issuedAt(new Date(System.currentTimeMillis()))
-                    .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                    .signWith(Key)
-                    .compact();
-        }
-        public  String generateRefreshToken(HashMap<String, Object> claims, UserDetails userDetails){
-            return Jwts.builder()
-                    .claims(claims)
-                    .subject(userDetails.getUsername())
-                    .issuedAt(new Date(System.currentTimeMillis()))
-                    .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                    .signWith(Key)
-                    .compact();
-        }
+    public String generateToken(UserDetails userDetails) {
+        return Jwts.builder()
+                .subject(userDetails.getUsername())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(Key)
+                .compact();
+    }
 
-        public  String extractUsername(String token){
-            return  extractClaims(token, Claims::getSubject);
-        }
+    public String generateRefreshToken(HashMap<String, Object> claims, UserDetails userDetails) {
+        return Jwts.builder()
+                .claims(claims)
+                .subject(userDetails.getUsername())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(Key)
+                .compact();
+    }
 
-        private <T> T extractClaims(String token, Function<Claims, T> claimsTFunction){
-            return claimsTFunction.apply(Jwts.parser().verifyWith(Key).build().parseSignedClaims(token).getPayload());
-        }
+    public String extractUsername(String token) {
+        return extractClaims(token, Claims::getSubject);
+    }
 
-        public  boolean isTokenValid(String token, UserDetails userDetails){
-            final String username = extractUsername(token);
-            return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
-        }
+    private <T> T extractClaims(String token, Function<Claims, T> claimsTFunction) {
+        return claimsTFunction.apply(Jwts.parser().verifyWith(Key).build().parseSignedClaims(token).getPayload());
+    }
 
-        public  boolean isTokenExpired(String token){
-            return extractClaims(token, Claims::getExpiration).before(new Date());
-        }
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
 
+    public boolean isTokenExpired(String token) {
+        return extractClaims(token, Claims::getExpiration).before(new Date());
+    }
 
 }

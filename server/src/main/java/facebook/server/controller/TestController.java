@@ -1,7 +1,6 @@
 package facebook.server.controller;
 
 import facebook.server.entity.User;
-import facebook.server.repository.UserRepository;
 import facebook.server.service.StorageS3Service;
 import facebook.server.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,8 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/user")
-public class UserController extends AbstractController<User, UserRepository> {
+@RequestMapping("/test")
+public class TestController {
     @Autowired
     UserService userService;
     @PostMapping("/photo")
@@ -35,16 +34,16 @@ public class UserController extends AbstractController<User, UserRepository> {
 
         //the encoder puts "/" in the string, so we replace it with "." to avoid path problems
         String imageHashed = userService.getPasswordEncoder().encode(userId.toString() +
-                user.getUsername()).
+                        user.getUsername()).
                 replace("/", ".");
         userService.getStorageS3Service().uploadFile(photo, imageHashed);
 
         user.setUrlPhoto(imageHashed);
         userService.getUserRepository().save(user);
         System.out.println(user);
-        return new ResponseEntity<>("{ \"msg\" : \"Photo received\", \"id_photo\": \"" + imageHashed + "\" }", HttpStatus.OK);
+        return new ResponseEntity<>("{ \"msg\" : \"Photo received\", \"url\": \"" + imageHashed + "\" }", HttpStatus.OK);
     }
-    @GetMapping("/image/{imageName}")
+    @GetMapping("/photo/{imageName}")
     public ResponseEntity<byte[]> getImage(@PathVariable String imageName) throws Exception {
         byte[] imageBytes = userService.getStorageS3Service().getImage(imageName);
 
@@ -56,8 +55,4 @@ public class UserController extends AbstractController<User, UserRepository> {
                 imageBytes,
                 headers, HttpStatus.OK);
     }
-    //TODO: implement login
-    //TODO: implement signup
-    //TODO: implement logout
-    //TODO: implement routing with JWT (adica sa nu poti accesa anumite rute fara sa fii logat)
 }
