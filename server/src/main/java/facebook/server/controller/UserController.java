@@ -1,5 +1,6 @@
 package facebook.server.controller;
 
+import facebook.server.dto.UserDTO;
 import facebook.server.entity.User;
 import facebook.server.repository.UserRepository;
 import facebook.server.service.StorageS3Service;
@@ -57,7 +58,15 @@ public class UserController extends AbstractController<User, UserRepository> {
                 headers, HttpStatus.OK);
     }
     //TODO: implement login
+    @PostMapping("/auth/login")
+    public ResponseEntity<UserDTO> login(@RequestBody UserDTO userDTO) {
+        return ResponseEntity.ok(userService.login(userDTO));
+    }
     //TODO: implement signup
+    @PostMapping("/auth/register")
+    public ResponseEntity<UserDTO> register(@RequestBody UserDTO userDTO) {
+        return ResponseEntity.ok(userService.register(userDTO));
+    }
     //TODO: implement logout
     //TODO: implement routing with JWT (adica sa nu poti accesa anumite rute fara sa fii logat)
 }
