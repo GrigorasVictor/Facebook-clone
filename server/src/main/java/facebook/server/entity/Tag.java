@@ -30,18 +30,9 @@ public class Tag {
     // Many-to-Many with Posts
     @ManyToMany
     @JoinTable(
-            name = "post_tag",
+            name = "content_tag",
             joinColumns = @JoinColumn(name = "tag_id"),
-            inverseJoinColumns = @JoinColumn(name = "post_id")
+            inverseJoinColumns = @JoinColumn(name = "content_id")
     )
-    private List<Post> posts;
-
-    // Many-to-Many with Comments
-    @ManyToMany
-    @JoinTable(
-            name = "comment_tag",
-            joinColumns = @JoinColumn(name = "tag_id"),
-            inverseJoinColumns = @JoinColumn(name = "comment_id")
-    )
-    private List<Comment> comments;
+    private List<Content> contents;
 }

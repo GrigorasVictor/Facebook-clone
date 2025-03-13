@@ -28,6 +28,6 @@ public class Vote {
     private String type;
 
     @ManyToOne
-    @JoinColumn(name = "post_id", nullable = false)
-    private Post post;
+    @JoinColumn(name = "content_id", nullable = false)
+    private Content content;
 }

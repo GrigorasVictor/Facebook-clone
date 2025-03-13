@@ -35,7 +35,7 @@ public class UserController extends AbstractController<User, UserRepository> {
         User user = optUser.get();
 
         //the encoder puts "/" in the string, so we replace it with "." to avoid path problems
-        String imageHashed = userService.getPasswordEncoder().encode(userId.toString() +
+        String imageHashed = userService.getPasswordEncoder().encode(userId +
                 user.getUsername()).
                 replace("/", ".");
         userService.getStorageS3Service().uploadFile(photo, imageHashed);
@@ -57,14 +57,13 @@ public class UserController extends AbstractController<User, UserRepository> {
                 imageBytes,
                 headers, HttpStatus.OK);
     }
-    //TODO: implement login
     @PostMapping("/auth/login")
     public ResponseEntity<UserDTO> login(@RequestBody UserDTO userDTO) {
         return ResponseEntity.ok(userService.login(userDTO));
     }
-    //TODO: implement signup
     @PostMapping("/auth/register")
     public ResponseEntity<UserDTO> register(@RequestBody UserDTO userDTO) {
+        System.out.println(userDTO);
         return ResponseEntity.ok(userService.register(userDTO));
     }
     //TODO: implement logout

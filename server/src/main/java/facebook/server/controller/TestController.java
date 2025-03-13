@@ -1,7 +1,6 @@
 package facebook.server.controller;
 
 import facebook.server.entity.User;
-import facebook.server.service.StorageS3Service;
 import facebook.server.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,7 @@ public class TestController {
         //if (token.isEmpty()) return new ResponseEntity<>("Missing token!", HttpStatus.BAD_REQUEST);
         //Integer userId = JwtService.staticExtractId(token.get());
 
-        Long userId = 3L; // hardcoded for now, need to implement JWT
+        Long userId = 4L; // hardcoded for now, need to implement JWT
         Optional<User> optUser = userService.getUserRepository().findById(userId);
         if (optUser.isEmpty()) return new ResponseEntity<>("Missing user!", HttpStatus.BAD_REQUEST);
         User user = optUser.get();

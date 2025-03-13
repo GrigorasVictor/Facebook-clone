@@ -3,6 +3,7 @@ package facebook.server.service;
 import facebook.server.dto.UserDTO;
 import facebook.server.entity.User;
 import facebook.server.repository.UserRepository;
+import facebook.server.utilities.UserBuilder;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,13 +30,12 @@ public class UserService {
     public UserDTO register(UserDTO registrationRequest) {
         UserDTO response = new UserDTO();
         try {
-            User user = new User();
-            user.setUsername(registrationRequest.getUsername());
-            user.setRole(registrationRequest.getRole());
-            user.setUrlPhoto(registrationRequest.getUrlPhoto());
-            user.setCreatedAt(registrationRequest.getCreatedAt());
-            user.setEmail(registrationRequest.getEmail());
-            user.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
+            User user = new UserBuilder()
+                    .withUsername(registrationRequest.getUsername())
+                    .withEmail(registrationRequest.getEmail())
+                    .withPassword(passwordEncoder.encode(registrationRequest.getPassword()))
+                    .build();
+
             User userResult = userRepository.save(user);
             if(userResult.getId() > 0) {
                 response.setUser(userResult);

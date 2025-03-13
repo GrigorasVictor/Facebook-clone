@@ -12,11 +12,11 @@ import java.util.List;
 @Getter @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Post {
+public class Content {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "post_id")
+    @Column(name = "content_id")
     private Long id;
 
     @ManyToOne
@@ -35,6 +35,10 @@ public class Post {
     @JsonProperty("status")
     private String status;
 
+    @Column(name = "type", nullable = false)
+    @JsonProperty("type")
+    private boolean typeContent;
+
     @Column(name = "nr_votes")
     @JsonProperty("nr_votes")
     private Integer nrVotes;
@@ -47,7 +51,7 @@ public class Post {
     @JsonProperty("url_photo")
     private String urlPhoto;
 
-    @ManyToMany(mappedBy = "posts")
+    @ManyToMany(mappedBy = "contents")
     private List<Tag> tags;
 
     @Column(name = "created_at", nullable = false, updatable = false)

@@ -2,6 +2,8 @@ package facebook.server.utilities;
 
 import facebook.server.entity.User;
 
+import java.time.LocalDateTime;
+
 public class UserBuilder {
     private final User user;
 
@@ -10,9 +12,9 @@ public class UserBuilder {
         user.setUsername("Default User");
         user.setEmail("default@example.com");
         user.setPassword("securepassword");
-        user.setUrlPhoto("http://example.com/photo.jpg");
+        user.setUrlPhoto("-");
         user.setRole("USER");
-        user.setCreatedAt("2023-10-01");
+        user.setCreatedAt(LocalDateTime.now().toString());
     }
 
     public UserBuilder withUsername(String username) {
@@ -39,12 +41,6 @@ public class UserBuilder {
         user.setRole(role);
         return this;
     }
-
-    public UserBuilder withCreatedAt(String createdAt) {
-        user.setCreatedAt(createdAt);
-        return this;
-    }
-
     public User build() {
         return user;
     }

@@ -1,4 +1,4 @@
-package facebook.server.CRUD;
+package facebook.server.crud;
 
 import facebook.server.entity.User;
 import facebook.server.repository.UserRepository;
@@ -26,7 +26,6 @@ public class UserTest {
                 .withPassword("securepassword")
                 .withUrlPhoto("http://example.com/photo.jpg")
                 .withRole("USER")
-                .withCreatedAt("2023-10-01")
                 .build();
 
         User savedUser = userRepository.save(user);
