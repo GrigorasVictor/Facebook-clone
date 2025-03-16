@@ -19,12 +19,13 @@ public class Friend {
     @Column(name = "friend_id")
     private Long id;
 
-    @Column(name = "user_id_1")
-    @JsonProperty("user_id_1")
-    private Long userId1;
+    @ManyToOne
+    @JoinColumn(name = "user_id_1", insertable = false, updatable = false)
+    @JsonProperty("user_1")
+    private User user1;
 
-    @Column(name = "user_id_2")
-    @JsonProperty("user_id_2")
-    private Long userId2;
-
+    @ManyToOne
+    @JoinColumn(name = "user_id_2", insertable = false, updatable = false)
+    @JsonProperty("user_2")
+    private User user2;
 }

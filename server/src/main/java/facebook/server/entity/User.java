@@ -1,5 +1,7 @@
 package facebook.server.entity;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,7 +14,6 @@ import java.util.List;
 
 @Entity
 @Table(name = "user")
-@Getter @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -31,7 +32,8 @@ public class User implements UserDetails{
     private String email;
 
     @Column(name = "password", nullable = false)
-    @JsonProperty("password")
+    //@JsonProperty("password")
+    @JsonIgnore
     private String password;
 
     @Column(name = "url_photo", nullable = false)
@@ -47,6 +49,7 @@ public class User implements UserDetails{
     private String createdAt;
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role));
     }
@@ -56,6 +59,7 @@ public class User implements UserDetails{
         return email;
     }
 
+    @JsonGetter("username")
     public String getName() { // conflict with getUsername, so I changed it to getName
         return username;
     }
@@ -65,21 +69,25 @@ public class User implements UserDetails{
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonExpired() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonLocked() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isEnabled() {
         return true;
     }

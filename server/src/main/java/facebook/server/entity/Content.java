@@ -1,5 +1,6 @@
 package facebook.server.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
@@ -52,6 +53,7 @@ public class Content {
     private String urlPhoto;
 
     @ManyToMany(mappedBy = "contents")
+    @JsonIgnoreProperties("contents")
     private List<Tag> tags;
 
     @Column(name = "created_at", nullable = false, updatable = false)
