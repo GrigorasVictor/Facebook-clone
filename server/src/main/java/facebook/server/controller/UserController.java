@@ -17,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/user")
 public class UserController extends AbstractController<User, UserRepository> {
     @Autowired
     UserService userService;
