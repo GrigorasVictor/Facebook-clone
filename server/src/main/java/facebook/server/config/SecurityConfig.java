@@ -34,10 +34,9 @@ public class SecurityConfig {
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/auth/register").permitAll()
                         .requestMatchers("/test/**").permitAll() // TODO: remove this after testing
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/auth/**", "/public/**").permitAll()
+                        .requestMatchers("/public/**").permitAll()
                         .requestMatchers("/admin/**").hasAnyAuthority("ADMIN")
                         .requestMatchers("/user/**").hasAnyAuthority("USER")
                         .requestMatchers("/adminuser/**").hasAnyAuthority("ADMIN", "USER")

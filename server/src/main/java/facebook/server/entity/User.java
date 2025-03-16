@@ -26,7 +26,7 @@ public class User implements UserDetails{
     @JsonProperty("username")
     private String username;
 
-    @Column(name = "email", nullable = false)
+    @Column(name = "email", nullable = false, unique = true)
     @JsonProperty("email")
     private String email;
 
@@ -56,6 +56,14 @@ public class User implements UserDetails{
         return email;
     }
 
+    public String getName() { // conflict with getUsername, so I changed it to getName
+        return username;
+    }
+
+    public void setName(String name) { // conflict with setUsername, so I changed it to setName
+        this.username = name;
+    }
+
     @Override
     public boolean isAccountNonExpired() {
         return true;
@@ -74,5 +82,18 @@ public class User implements UserDetails{
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", urlPhoto='" + urlPhoto + '\'' +
+                ", role='" + role + '\'' +
+                ", createdAt='" + createdAt + '\'' +
+                '}';
     }
 }

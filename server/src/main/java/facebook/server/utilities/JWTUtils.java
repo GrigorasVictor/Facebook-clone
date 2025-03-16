@@ -1,4 +1,4 @@
-package facebook.server.service;
+package facebook.server.utilities;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;

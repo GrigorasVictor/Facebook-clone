@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/user")
 public class UserController extends AbstractController<User, UserRepository> {
     @Autowired
     UserService userService;
@@ -44,7 +45,7 @@ public class UserController extends AbstractController<User, UserRepository> {
         System.out.println(user);
         return new ResponseEntity<>("{ \"msg\" : \"Photo received\", \"id_photo\": \"" + imageHashed + "\" }", HttpStatus.OK);
     }
-    @GetMapping("/image/{imageName}")
+    @GetMapping("/photo/{imageName}")
     public ResponseEntity<byte[]> getImage(@PathVariable String imageName) throws Exception {
         byte[] imageBytes = userService.getStorageS3Service().getImage(imageName);
 
@@ -56,15 +57,4 @@ public class UserController extends AbstractController<User, UserRepository> {
                 imageBytes,
                 headers, HttpStatus.OK);
     }
-    @PostMapping("/auth/login")
-    public ResponseEntity<UserDTO> login(@RequestBody UserDTO userDTO) {
-        return ResponseEntity.ok(userService.login(userDTO));
-    }
-    @PostMapping("/auth/register")
-    public ResponseEntity<UserDTO> register(@RequestBody UserDTO userDTO) {
-        System.out.println(userDTO);
-        return ResponseEntity.ok(userService.register(userDTO));
-    }
-    //TODO: implement logout
-    //TODO: implement routing with JWT (adica sa nu poti accesa anumite rute fara sa fii logat)
 }

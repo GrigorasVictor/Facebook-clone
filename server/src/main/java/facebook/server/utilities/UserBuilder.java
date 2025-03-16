@@ -9,7 +9,7 @@ public class UserBuilder {
 
     public UserBuilder() {
         user = new User();
-        user.setUsername("Default User");
+        user.setName("Default User");
         user.setEmail("default@example.com");
         user.setPassword("securepassword");
         user.setUrlPhoto("-");
@@ -18,7 +18,7 @@ public class UserBuilder {
     }
 
     public UserBuilder withUsername(String username) {
-        user.setUsername(username);
+        user.setName(username);
         return this;
     }
 

@@ -1,7 +1,7 @@
 package facebook.server.config;
 
 
-import facebook.server.service.JWTUtils;
+import facebook.server.utilities.JWTUtils;
 import facebook.server.service.UserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -30,7 +30,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
+        System.out.println(request);
         final String authHeader = request.getHeader("Authorization");
         final String jwtToken;
         final String userEmail;

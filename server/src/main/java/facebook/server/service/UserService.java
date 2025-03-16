@@ -3,6 +3,7 @@ package facebook.server.service;
 import facebook.server.dto.UserDTO;
 import facebook.server.entity.User;
 import facebook.server.repository.UserRepository;
+import facebook.server.utilities.JWTUtils;
 import facebook.server.utilities.UserBuilder;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,13 +30,19 @@ public class UserService {
 
     public UserDTO register(UserDTO registrationRequest) {
         UserDTO response = new UserDTO();
+
         try {
             User user = new UserBuilder()
                     .withUsername(registrationRequest.getUsername())
                     .withEmail(registrationRequest.getEmail())
                     .withPassword(passwordEncoder.encode(registrationRequest.getPassword()))
                     .build();
-
+            System.out.println(user);
+            if(userRepository.findByEmail(user.getEmail()).isPresent()) {
+                response.setStatusCode(400);
+                response.setMessage("User already exists!");
+                return response;
+            }
             User userResult = userRepository.save(user);
             if(userResult.getId() > 0) {
                 response.setUser(userResult);
