@@ -2,6 +2,7 @@ package facebook.server.service;
 
 import facebook.server.dto.UserDTO;
 import facebook.server.entity.User;
+import facebook.server.repository.AbstractRepository;
 import facebook.server.repository.UserRepository;
 import facebook.server.utilities.JWTUtils;
 import facebook.server.utilities.UserBuilder;
@@ -16,7 +17,7 @@ import java.util.HashMap;
 
 @Service
 @Getter
-public class UserService {
+public class UserService extends AbstractService<User, AbstractRepository<User>> {
     @Autowired
     private UserRepository userRepository;
     @Autowired

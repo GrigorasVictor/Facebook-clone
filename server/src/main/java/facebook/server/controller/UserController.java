@@ -18,7 +18,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/user")
-public class UserController extends AbstractController<User, UserRepository> {
+public class UserController extends AbstractController<User, UserService> {
     @Autowired
     UserService userService;
     @PostMapping("/photo")

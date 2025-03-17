@@ -1,5 +1,7 @@
 package facebook.server.controller;
 
+import facebook.server.repository.AbstractRepository;
+import facebook.server.service.AbstractService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
@@ -8,31 +10,31 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class AbstractController<T, R extends JpaRepository<T, Long>>{
+public abstract class AbstractController<T, S extends AbstractService<T, ? extends AbstractRepository<T>>> {
 
     @Autowired
-    R repository; // merge chiar daca arata eroare
+    S service; // merge chiar daca arata eroare
 
     @PostMapping
     public ResponseEntity<T> add(@RequestBody T newEntry) {
         System.out.println(newEntry);
-        repository.save(newEntry);
+        service.getRepository().save(newEntry);
         return new ResponseEntity<>(newEntry, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<T> delete(@PathVariable Long id){
-        repository.deleteById(id);
+        service.getRepository().deleteById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping
     public ResponseEntity<List<T>> getAll(){
-        return new ResponseEntity<>(repository.findAll(), HttpStatus.OK);
+        return new ResponseEntity<>(service.getRepository().findAll(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Optional<T>> get(@PathVariable Long id){
-        return new ResponseEntity<>(repository.findById(id), HttpStatus.OK);
+        return new ResponseEntity<>(service.getRepository().findById(id), HttpStatus.OK);
     }
 }
