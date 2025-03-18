@@ -1,5 +1,5 @@
 package facebook.server.utilities;
 
-public class DAOBuilder {
+public class DTOBuilder {
     //TODO: Implement
 }
