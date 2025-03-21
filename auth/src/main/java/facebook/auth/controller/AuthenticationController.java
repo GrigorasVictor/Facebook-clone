@@ -4,7 +4,6 @@ import facebook.auth.dto.AuthDTO;
 import facebook.auth.dto.RegisterDTO;
 import facebook.auth.dto.UserDTO;
 import facebook.auth.service.UserService;
-import facebook.auth.utilities.AESUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,7 +35,8 @@ public class AuthenticationController {
 
         try {
             UserDTO userDTO = userService.register(registerDTO);
-            System.out.println(userService.getAesUtil().encrypt(userDTO.toString()));
+            userService.sendPayload(userDTO);
+
             return ResponseEntity.ok(userDTO);
 
         }catch (Exception e){

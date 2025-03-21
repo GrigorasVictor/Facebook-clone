@@ -12,10 +12,12 @@ import facebook.auth.utilities.JWTUtils;
 import facebook.auth.utilities.UserAuthentificationBuilder;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 
@@ -113,6 +115,23 @@ public class UserService{
 
         }
         return response.build();
+    }
+
+
+    public String sendPayload(UserDTO userDTO) throws Exception{
+        RestTemplate restTemplate = new RestTemplate();
+
+        String request = aesUtil.encrypt(userDTO.toString());
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                "http://localhost:8081/server", request, String.class);
+
+        if (response.getStatusCodeValue() != 200) {
+            throw new Exception(String.format("[%d] %s",
+                    response.getStatusCodeValue(),
+                    response.getBody()));
+        }
+
+        return response.getBody();
     }
 }
 
