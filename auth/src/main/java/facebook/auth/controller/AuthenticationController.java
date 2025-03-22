@@ -3,6 +3,7 @@ package facebook.auth.controller;
 import facebook.auth.dto.AuthDTO;
 import facebook.auth.dto.RegisterDTO;
 import facebook.auth.dto.UserDTO;
+import facebook.auth.entity.User;
 import facebook.auth.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -33,14 +34,22 @@ public class AuthenticationController {
             return ResponseEntity.badRequest().build();
         }
 
+        User user = null;
         try {
             UserDTO userDTO = userService.register(registerDTO);
-            userService.sendPayload(userDTO);
+            if(userDTO.getStatusCode() == 400)
+                return ResponseEntity.badRequest().body(userDTO);
+
+            user = userDTO.getUser();
+            userService.sendPayload(user);
 
             return ResponseEntity.ok(userDTO);
-
         }catch (Exception e){
             System.out.println(e.getMessage());
+            if(user != null)
+                userService.getUserAuthentificationRepository()
+                                .delete(userService.getUserAuthentificationRepository()
+                                .findByEmail(user.getEmail()).get());
             return ResponseEntity.internalServerError().build();
         }
     }

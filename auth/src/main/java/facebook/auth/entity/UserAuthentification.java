@@ -106,9 +106,8 @@ public class UserAuthentification implements UserDetails{
                 ", createdAt='" + createdAt + '\'' +
                 '}';
     }
-
     public User toUser() {
-        return new User(id, username,
-                email, role, createdAt);
+        return new User(id, username, email,
+                password, role, createdAt);
     }
 }

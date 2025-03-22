@@ -45,8 +45,6 @@ public class UserService{
                     .withPassword(passwordEncoder.encode(registerDTO.getPassword()))
                     .build();
 
-            System.out.println(user);
-
             if(userAuthentificationRepository.findByEmail(user.getEmail()).isPresent()) {
                 response.withStatusCode(400)
                         .withMessage("User already exists with this email!");
@@ -63,6 +61,7 @@ public class UserService{
                 return response.build();
             }
         }catch (Exception e) {
+            System.out.println(e.getMessage());
             response.withStatusCode(500)
                     .withError(e.getMessage());
         }
@@ -118,13 +117,20 @@ public class UserService{
     }
 
 
-    public String sendPayload(UserDTO userDTO) throws Exception{
+    public String sendPayload(User user) throws Exception{
+        if(user == null) {
+            throw new Exception("User is null!");
+        }
         RestTemplate restTemplate = new RestTemplate();
-
-        String request = aesUtil.encrypt(userDTO.toString());
+        String request = aesUtil.encrypt(user.toString());
         ResponseEntity<String> response = restTemplate.postForEntity(
                 "http://localhost:8081/server", request, String.class);
 
+        if(response.getStatusCodeValue() == 400){
+            throw new Exception(String.format("[%d] %s",
+                    response.getStatusCodeValue(),
+                    response.getBody()));
+        }
         if (response.getStatusCodeValue() != 200) {
             throw new Exception(String.format("[%d] %s",
                     response.getStatusCodeValue(),
