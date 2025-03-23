@@ -32,8 +32,8 @@ public class User implements UserDetails{
     private String email;
 
     @Column(name = "password", nullable = false)
-    //@JsonProperty("password")
-    @JsonIgnore
+    @JsonProperty("password")
+    //@JsonIgnore
     private String password;
 
     @Column(name = "url_photo", nullable = false)

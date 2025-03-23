@@ -51,7 +51,7 @@ public class Content {
     @Column(name = "nr_comments", nullable = false)
     private int nrComments;
 
-    @JsonProperty("nr_votes")
+    @JsonProperty("nr_votes") //updating when user votes (vote = vote + 1)
     @Column(name = "nr_votes", nullable = false)
     private int nrVotes;
 

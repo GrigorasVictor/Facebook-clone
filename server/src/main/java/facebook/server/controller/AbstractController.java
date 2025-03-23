@@ -36,4 +36,14 @@ public abstract class AbstractController<T, S extends AbstractService<T, ? exten
     public ResponseEntity<Optional<T>> get(@PathVariable Long id){
         return new ResponseEntity<>(service.getRepository().findById(id), HttpStatus.OK);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<T> update(@PathVariable Long id, @RequestBody T updatedEntry) {
+        if (service.getRepository().existsById(id)) {
+            service.getRepository().save(updatedEntry);
+            return new ResponseEntity<>(updatedEntry, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 }
