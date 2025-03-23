@@ -19,7 +19,6 @@ public abstract class AbstractController<T, S extends AbstractService<T, ? exten
         service.save(newEntry);
         return new ResponseEntity<>(newEntry, HttpStatus.OK);
     }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<T> delete(@PathVariable Long id){
         service.deleteById(id);
