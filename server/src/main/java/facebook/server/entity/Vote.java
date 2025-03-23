@@ -1,5 +1,6 @@
 package facebook.server.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,7 @@ public class Vote {
     private String type;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "content_id", nullable = false)
     private Content content;
 }

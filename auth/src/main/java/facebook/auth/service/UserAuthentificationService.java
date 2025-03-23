@@ -23,7 +23,7 @@ import java.util.HashMap;
 
 @Service
 @Getter
-public class UserService{
+public class UserAuthentificationService extends AbstractService<UserAuthentification, UserAuthentificationRepository> {
     @Autowired
     private UserAuthentificationRepository userAuthentificationRepository;
     @Autowired

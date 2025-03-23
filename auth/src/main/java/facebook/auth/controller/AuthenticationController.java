@@ -4,7 +4,7 @@ import facebook.auth.dto.AuthDTO;
 import facebook.auth.dto.RegisterDTO;
 import facebook.auth.dto.UserDTO;
 import facebook.auth.entity.User;
-import facebook.auth.service.UserService;
+import facebook.auth.service.UserAuthentificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 public class AuthenticationController {
     @Autowired
-    UserService userService;
+    UserAuthentificationService userService;
 
     @PostMapping("/login")
     public ResponseEntity<UserDTO> login(@RequestBody AuthDTO authDTO) {

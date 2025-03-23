@@ -40,21 +40,20 @@ public class Content {
     @JsonProperty("type")
     private boolean typeContent;
 
-    @Column(name = "nr_votes")
-    @JsonProperty("nr_votes")
-    private Integer nrVotes;
+    @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Vote> votes;
 
-    @Column(name = "nr_comments")
-    @JsonProperty("nr_comments")
-    private Integer nrComments;
-
-    @Column(name = "url_photo")
-    @JsonProperty("url_photo")
-    private String urlPhoto;
-
-    @ManyToMany(mappedBy = "contents")
     @JsonIgnoreProperties("contents")
+    @ManyToMany(mappedBy = "contents")
     private List<Tag> tags;
+
+    @JsonProperty("nr_comments")
+    @Column(name = "nr_comments", nullable = false)
+    private int nrComments;
+
+    @JsonProperty("nr_votes")
+    @Column(name = "nr_votes", nullable = false)
+    private int nrVotes;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @JsonProperty("created_at")

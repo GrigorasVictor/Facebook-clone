@@ -1,7 +1,7 @@
-package facebook.server.controller;
+package facebook.auth.controller;
 
-import facebook.server.repository.AbstractRepository;
-import facebook.server.service.AbstractService;
+import facebook.auth.repository.AbstractRepository;
+import facebook.auth.service.AbstractService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
