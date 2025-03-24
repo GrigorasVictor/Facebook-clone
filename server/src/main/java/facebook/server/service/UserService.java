@@ -1,25 +1,17 @@
 package facebook.server.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import facebook.server.dto.UserDTO;
 import facebook.server.entity.User;
 import facebook.server.repository.AbstractRepository;
 import facebook.server.repository.UserRepository;
-import facebook.server.utilities.AESUtil;
 import facebook.server.utilities.JWTUtils;
 import facebook.server.utilities.UserBuilder;
+import facebook.server.utilities.AESUtil;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.HashMap;
 
 @Service
 @Getter
