@@ -1,9 +1,6 @@
 package facebook.server.controller;
 
-import facebook.server.dto.UserDTO;
 import facebook.server.entity.User;
-import facebook.server.repository.UserRepository;
-import facebook.server.service.StorageS3Service;
 import facebook.server.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;

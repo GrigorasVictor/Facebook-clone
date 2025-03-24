@@ -37,6 +37,8 @@ public class UserTest {
         assertThat(savedUser.getUrlPhoto()).isEqualTo(user.getUrlPhoto());
         assertThat(savedUser.getRole()).isEqualTo(user.getRole());
         assertThat(savedUser.getCreatedAt()).isEqualTo(user.getCreatedAt());
+
+        userRepository.deleteById(savedUser.getId());
     }
 
     @Test
@@ -52,6 +54,8 @@ public class UserTest {
         assertThat(foundUser).isPresent();
         assertThat(foundUser.get().getUsername()).isEqualTo(user.getUsername());
         assertThat(foundUser.get().getEmail()).isEqualTo(user.getEmail());
+
+        userRepository.deleteById(savedUser.getId());
     }
 
     @Test
@@ -65,6 +69,9 @@ public class UserTest {
         Iterable<User> users = userRepository.findAll();
 
         assertThat(users).hasSizeGreaterThanOrEqualTo(2);  // Ensures at least 2 users exist
+        userRepository.deleteById(user1.getId());
+        userRepository.deleteById(user2.getId());
+
     }
 
     @Test

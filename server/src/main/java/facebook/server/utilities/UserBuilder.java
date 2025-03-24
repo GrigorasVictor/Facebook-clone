@@ -44,4 +44,38 @@ public class UserBuilder {
     public User build() {
         return user;
     }
+
+    public static User toUser(String payload) {
+        String[] parts = payload.split(", ");
+        User user = new User();
+        user.setId(null); // fixing "row was updated or deleted by another transaction" error
+
+        for (String part : parts) {
+            String[] keyValue = part.split("=");
+            String key = keyValue[0].trim();
+            String value = keyValue[1].trim();
+
+            switch (key) {
+                case "username":
+                    user.setName(value);
+                    break;
+                case "email":
+                    user.setEmail(value);
+                    break;
+                case "urlPhoto":
+                    user.setUrlPhoto(value);
+                    break;
+                case "role":
+                    user.setRole(value);
+                    break;
+                case "createdAt":
+                    user.setCreatedAt(value);
+                    break;
+                case "password":
+                    user.setPassword(value);
+                    break;
+            }
+        }
+        return user;
+    }
 }

@@ -12,16 +12,18 @@ import facebook.auth.utilities.JWTUtils;
 import facebook.auth.utilities.UserAuthentificationBuilder;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 
 @Service
 @Getter
-public class UserService{
+public class UserAuthentificationService extends AbstractService<UserAuthentification, UserAuthentificationRepository> {
     @Autowired
     private UserAuthentificationRepository userAuthentificationRepository;
     @Autowired
@@ -43,8 +45,6 @@ public class UserService{
                     .withPassword(passwordEncoder.encode(registerDTO.getPassword()))
                     .build();
 
-            System.out.println(user);
-
             if(userAuthentificationRepository.findByEmail(user.getEmail()).isPresent()) {
                 response.withStatusCode(400)
                         .withMessage("User already exists with this email!");
@@ -61,6 +61,7 @@ public class UserService{
                 return response.build();
             }
         }catch (Exception e) {
+            System.out.println(e.getMessage());
             response.withStatusCode(500)
                     .withError(e.getMessage());
         }
@@ -113,6 +114,30 @@ public class UserService{
 
         }
         return response.build();
+    }
+
+
+    public String sendPayload(User user) throws Exception{
+        if(user == null) {
+            throw new Exception("User is null!");
+        }
+        RestTemplate restTemplate = new RestTemplate();
+        String request = aesUtil.encrypt(user.toString());
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                "http://localhost:8081/server", request, String.class);
+
+        if(response.getStatusCodeValue() == 400){
+            throw new Exception(String.format("[%d] %s",
+                    response.getStatusCodeValue(),
+                    response.getBody()));
+        }
+        if (response.getStatusCodeValue() != 200) {
+            throw new Exception(String.format("[%d] %s",
+                    response.getStatusCodeValue(),
+                    response.getBody()));
+        }
+
+        return response.getBody();
     }
 }
 

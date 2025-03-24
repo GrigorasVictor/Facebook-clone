@@ -2,6 +2,7 @@ package facebook.auth.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import facebook.auth.utilities.UserAuthentificationBuilder;
 import lombok.Data;
 
 @Data
@@ -17,6 +18,9 @@ public class User {
     @JsonProperty("email")
     private String email;
 
+    @JsonProperty("password")
+    private String password;
+
     @JsonProperty("profile_picture")
     private String urlPhoto;
 
@@ -26,10 +30,11 @@ public class User {
     @JsonProperty("created_at")
     private String createdAt;
 
-    public User(Long id, String username, String email, String role, String createdAt) {
+    public User(Long id, String username, String email, String password, String role, String createdAt) {
         this.id = id;
         this.username = username;
         this.email = email;
+        this.password = password;
         this.urlPhoto = "url";
         this.role = role;
         this.createdAt = createdAt;
