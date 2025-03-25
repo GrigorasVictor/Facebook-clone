@@ -16,8 +16,7 @@ public abstract class AbstractController<T, S extends AbstractService<T, ? exten
 
     @PostMapping
     public ResponseEntity<T> add(@RequestBody T newEntry) {
-        service.save(newEntry);
-        return new ResponseEntity<>(newEntry, HttpStatus.OK);
+        return new ResponseEntity<>(service.save(newEntry), HttpStatus.OK);
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<T> delete(@PathVariable Long id){

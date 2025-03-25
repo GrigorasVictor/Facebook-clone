@@ -22,6 +22,7 @@ public class Content {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties("password")
     private User user;
 
     @Column(name = "title", nullable = false)
@@ -47,6 +48,8 @@ public class Content {
     @ManyToMany(mappedBy = "contents")
     private List<Tag> tags;
 
+    private String urlPhoto;
+
     @JsonProperty("nr_comments")
     @Column(name = "nr_comments", nullable = false)
     private int nrComments;
@@ -58,4 +61,6 @@ public class Content {
     @Column(name = "created_at", nullable = false, updatable = false)
     @JsonProperty("created_at")
     private LocalDateTime createdAt;
+
+    //private List<Content> contents;
 }

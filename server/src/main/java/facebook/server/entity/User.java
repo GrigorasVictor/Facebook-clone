@@ -48,6 +48,8 @@ public class User implements UserDetails {
     @JsonProperty("created_at")
     private String createdAt;
 
+
+
     @Override
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
