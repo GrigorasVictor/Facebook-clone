@@ -6,22 +6,24 @@ import facebook.server.repository.ContentRepository;
 import facebook.server.utilities.JWTUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 
 @Service
 public class ContentService extends AbstractService<Content, ContentRepository> {
-
     @Autowired
     private UserService userService;
-
     @Autowired
     private HttpServletRequest request;
     @Autowired
     private JWTUtils jwtUtils;
     @Autowired
     private StorageS3Service storageS3Service;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public Content save(Content entity) {
@@ -38,7 +40,34 @@ public class ContentService extends AbstractService<Content, ContentRepository> 
         entity.setNrVotes(0);
         entity.setTags(new ArrayList<>());
 
+        //saving the ph
         return repository.save(entity);
+    }
+
+    public Content save(Content entity, MultipartFile photo) { //save with photo
+        final String authHeader = request.getHeader("Authorization");
+        final String jwtToken = authHeader.substring(7);
+
+        User user = userService.getUserRepository()
+                .findByEmail(jwtUtils.extractUsername(jwtToken))
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        entity.setUser(user);
+        entity.setVotes(new ArrayList<>());
+        entity.setNrComments(0);
+        entity.setNrVotes(0);
+        entity.setTags(new ArrayList<>());
+
+        Content savedContent = repository.save(entity);
+
+        //saving the photo
+        //the encoder puts "/" in the string, so we replace it with "." to avoid path problems
+        String imageHashed = passwordEncoder.encode(savedContent.getId() +
+                user.getUsername()).replace("/", ".");
+
+        storageS3Service.uploadFile(photo, imageHashed);
+        savedContent.setUrlPhoto(imageHashed);
+        return repository.save(savedContent);
     }
 
     @Override

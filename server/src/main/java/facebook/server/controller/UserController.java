@@ -1,7 +1,9 @@
 package facebook.server.controller;
 
+import facebook.server.dto.UserDTO;
 import facebook.server.entity.User;
 import facebook.server.service.UserService;
+import facebook.server.utilities.DTOBuilder;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -19,39 +21,36 @@ public class UserController extends AbstractController<User, UserService> {
     @Autowired
     UserService userService;
     @PostMapping("/photo")
-    public ResponseEntity<String> handleFileUpload(HttpServletRequest req, @RequestParam("photo") MultipartFile photo) {
-        if (photo.isEmpty()) return new ResponseEntity<>("Photo empty", HttpStatus.BAD_REQUEST);
+    public ResponseEntity<UserDTO> handleFileUpload(@RequestPart("photo") MultipartFile photo) {
+        User user = userService.savePhoto(photo);
+        DTOBuilder dtoBuilder = new DTOBuilder();
 
-        //Optional<String> token = JwtService.getToken(req);
-        //if (token.isEmpty()) return new ResponseEntity<>("Missing token!", HttpStatus.BAD_REQUEST);
-        //Integer userId = JwtService.staticExtractId(token.get());
-
-        Long userId = 3L; // hardcoded for now, need to implement JWT
-        Optional<User> optUser = userService.getUserRepository().findById(userId);
-        if (optUser.isEmpty()) return new ResponseEntity<>("Missing user!", HttpStatus.BAD_REQUEST);
-        User user = optUser.get();
-
-        //the encoder puts "/" in the string, so we replace it with "." to avoid path problems
-        String imageHashed = userService.getPasswordEncoder().encode(userId +
-                user.getUsername()).
-                replace("/", ".");
-        userService.getStorageS3Service().uploadFile(photo, imageHashed);
-
-        user.setUrlPhoto(imageHashed);
-        userService.getUserRepository().save(user);
-        System.out.println(user);
-        return new ResponseEntity<>("{ \"msg\" : \"Photo received\", \"id_photo\": \"" + imageHashed + "\" }", HttpStatus.OK);
+        if(user == null) {
+            dtoBuilder.withError("404")
+                    .withMessage("Photo not saved")
+                    .build();
+        }else{
+            dtoBuilder.withError("200")
+                    .withUser(user)
+                    .withMessage("Photo saved")
+                    .build();
+        }
+        return new ResponseEntity<>(dtoBuilder.build(), HttpStatus.OK);
     }
     @GetMapping("/photo/{imageName}")
-    public ResponseEntity<byte[]> getImage(@PathVariable String imageName) throws Exception {
-        byte[] imageBytes = userService.getStorageS3Service().getImage(imageName);
+    public ResponseEntity<byte[]> getImage(@PathVariable String imageName){
+        try{
+            byte[] imageBytes = userService.getStorageS3Service().getImage(imageName);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_PNG);
-        headers.setContentLength(imageBytes.length);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.IMAGE_PNG);
+            headers.setContentLength(imageBytes.length);
 
-        return new ResponseEntity<>(
-                imageBytes,
-                headers, HttpStatus.OK);
+            return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
+    //TODO: user-ul normal n-are voie sa adauge sau sa stearga useri, update-ul numa daca este pe el insusi(din token)
 }
