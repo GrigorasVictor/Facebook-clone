@@ -17,6 +17,7 @@ public class Content {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty("id")
     @Column(name = "content_id")
     private Long id;
 
@@ -42,6 +43,7 @@ public class Content {
     private boolean typeContent;
 
     @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("content")
     private List<Vote> votes;
 
     @JsonIgnoreProperties("contents")
@@ -61,6 +63,4 @@ public class Content {
     @Column(name = "created_at", nullable = false, updatable = false)
     @JsonProperty("created_at")
     private LocalDateTime createdAt;
-
-    //private List<Content> contents;
 }

@@ -37,6 +37,15 @@ public class UserService extends AbstractService<User, AbstractRepository<User>>
     @Autowired
     private HttpServletRequest request;
 
+    public Long getUserIdFromJWT(){
+        final String jwtToken = request.getHeader("Authorization")
+                .substring(7);
+        if (jwtToken.isEmpty()) return null;
+
+        return userRepository.findByEmail(jwtUtils.extractUsername(jwtToken))
+                .get().getId();
+    }
+
     @Transactional
     public void processPayload(String payload) throws Exception {
         String decryptedPayload = aesUtil.decrypt(payload);

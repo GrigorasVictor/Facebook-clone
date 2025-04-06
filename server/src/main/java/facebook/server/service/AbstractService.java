@@ -13,7 +13,7 @@ public abstract class AbstractService<T, R extends AbstractRepository<T>> {
     @Autowired
     protected R repository;
 
-    public T save(T entity) {
+    public T save(T entity) throws Exception {
         System.out.println(entity);
         return repository.save(entity);
     }

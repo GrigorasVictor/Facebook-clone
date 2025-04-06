@@ -15,7 +15,7 @@ public abstract class AbstractController<T, S extends AbstractService<T, ? exten
     S service; // merge chiar daca arata eroare
 
     @PostMapping
-    public ResponseEntity<T> add(@RequestBody T newEntry) {
+    public ResponseEntity<T> add(@RequestBody T newEntry) throws Exception {
         return new ResponseEntity<>(service.save(newEntry), HttpStatus.OK);
     }
     @DeleteMapping("/{id}")
