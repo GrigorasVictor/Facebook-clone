@@ -40,7 +40,7 @@ public abstract class AbstractController<T, S extends AbstractService<T, ? exten
     public ResponseEntity<T> update(@PathVariable Long id, @RequestBody T updatedEntry) {
         T newEntity = service.update(id, updatedEntry);
 
-        return newEntity == null ? new ResponseEntity<>(updatedEntry, HttpStatus.OK) :
+        return newEntity != null ? new ResponseEntity<>(updatedEntry, HttpStatus.OK) :
                                     new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

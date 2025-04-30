@@ -1,0 +1,93 @@
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f0f2f5;
+  padding: 20px;
+}
+
+.register-box {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 100%;
+  max-width: 432px;
+}
+
+.register-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+}
+
+.register-subtitle {
+  color: #606770;
+  font-size: 15px;
+  text-align: center;
+  margin: 10px 0 20px;
+}
+
+.register-button {
+  background-color: #42b72a;
+  color: white;
+  padding: 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.register-button:hover {
+  background-color: #36a420;
+}
+
+.register-button:disabled {
+  background-color: #8bc4f9;
+  cursor: not-allowed;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.login-link a {
+  color: #1877f2;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+.error-message {
+  color: #ff3333;
+  background-color: #ffebee;
+  padding: 10px;
+  border-radius: 4px;
+  margin: 10px 0;
+  font-size: 14px;
+  text-align: center;
+}
+
+.success-message {
+  color: #4caf50;
+  background-color: #e8f5e9;
+  padding: 10px;
+  border-radius: 4px;
+  margin: 10px 0;
+  font-size: 14px;
+  text-align: center;
+}
+
+input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+} 
