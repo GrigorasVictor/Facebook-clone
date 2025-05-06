@@ -31,7 +31,7 @@ public class Vote {
 
     @ManyToOne
     @JsonIgnoreProperties("votes")
-    @JoinColumn(name = "content_id", nullable = false)
+    @JoinColumn(name = "content_id")
     private Content content;
 
     @Override

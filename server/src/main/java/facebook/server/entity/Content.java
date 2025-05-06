@@ -16,7 +16,7 @@ import java.util.List;
 public class Content {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @JsonProperty("id")
     @Column(name = "content_id")
     private Long id;
@@ -63,4 +63,27 @@ public class Content {
     @Column(name = "created_at", nullable = false, updatable = false)
     @JsonProperty("created_at")
     private LocalDateTime createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "parent_id", referencedColumnName = "content_id", nullable = true, updatable = false)
+    @JsonProperty("parent_id")
+    private Content parentContent;
+
+    @Override
+    public String toString() {
+        return "Content{" +
+                "id=" + id +
+                ", user=" + user +
+                ", title='" + title + '\'' +
+                ", text='" + text + '\'' +
+                ", status='" + status + '\'' +
+                ", typeContent=" + typeContent +
+                ", votes=" + votes +
+                ", tags=" + tags +
+                ", urlPhoto='" + urlPhoto + '\'' +
+                ", nrComments=" + nrComments +
+                ", nrVotes=" + nrVotes +
+                ", createdAt=" + createdAt +
+                '}';
+    }
 }

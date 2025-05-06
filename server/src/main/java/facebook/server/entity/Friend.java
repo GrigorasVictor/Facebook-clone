@@ -28,4 +28,12 @@ public class Friend {
     @JoinColumn(name = "user_id_2", insertable = false, updatable = false)
     @JsonProperty("user_2")
     private User user2;
+
+    @Column(name = "status1") // it should be nullable = false, but we need to refactor the entire database
+    @JsonProperty("status1")
+    private boolean status;
+
+    @Column(name = "status2") // it should be nullable = false, but we need to refactor the entire database
+    @JsonProperty("status2")
+    private boolean status2;
 }

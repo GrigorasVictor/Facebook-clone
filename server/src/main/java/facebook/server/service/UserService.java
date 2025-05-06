@@ -45,6 +45,13 @@ public class UserService extends AbstractService<User, AbstractRepository<User>>
         return userRepository.findByEmail(jwtUtils.extractUsername(jwtToken))
                 .get().getId();
     }
+    public User getUserFromJWT(){
+        final String jwtToken = request.getHeader("Authorization")
+                .substring(7);
+        if (jwtToken.isEmpty()) return null;
+
+        return userRepository.findByEmail(jwtUtils.extractUsername(jwtToken)).get();
+    }
 
     @Transactional
     public void processPayload(String payload) throws Exception {
