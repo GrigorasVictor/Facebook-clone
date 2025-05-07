@@ -17,7 +17,7 @@ import lombok.Setter;
 public class Vote {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "vote_id")
     private Long id;
 

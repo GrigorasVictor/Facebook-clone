@@ -1,12 +1,11 @@
 package facebook.server.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -15,27 +14,22 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Tag {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "tag_id")
     private Long id;
 
     @Column(name = "name", nullable = false, unique = true)
-    @JsonProperty("name")
     private String name;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    @JsonProperty("created_at")
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    // Many-to-Many with Posts
-    @ManyToMany
-    @JoinTable(
-            name = "content_tag",
-            joinColumns = @JoinColumn(name = "tag_id"),
-            inverseJoinColumns = @JoinColumn(name = "content_id")
-    )
+    @ManyToMany(mappedBy = "tags")
     @JsonIgnoreProperties("tags")
-    private List<Content> contents;
+    private List<Content> contents = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User owner;
 }

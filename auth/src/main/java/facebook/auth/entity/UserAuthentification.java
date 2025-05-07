@@ -21,7 +21,7 @@ import java.util.List;
 @Data
 public class UserAuthentification implements UserDetails{
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "user_id")
     private Long id;
 

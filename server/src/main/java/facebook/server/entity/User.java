@@ -19,7 +19,7 @@ import java.util.List;
 @Data
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
 
@@ -33,7 +33,7 @@ public class User implements UserDetails {
 
     @Column(name = "password", nullable = false)
     @JsonProperty("password")
-    //@JsonIgnore
+    @JsonIgnore
     private String password;
 
     @Column(name = "url_photo", nullable = false)

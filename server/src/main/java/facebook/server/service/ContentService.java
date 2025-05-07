@@ -1,6 +1,8 @@
 package facebook.server.service;
 
+import facebook.server.dto.ContentDTO;
 import facebook.server.entity.Content;
+import facebook.server.entity.Tag;
 import facebook.server.entity.User;
 import facebook.server.repository.ContentRepository;
 import facebook.server.utilities.JWTUtils;
@@ -29,6 +31,8 @@ public class ContentService extends AbstractService<Content, ContentRepository> 
     private StorageS3Service storageS3Service;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private TagService tagService;
 
     @Override
     public Content save(Content entity) {
@@ -49,28 +53,60 @@ public class ContentService extends AbstractService<Content, ContentRepository> 
         return repository.save(entity);
     }
 
-    public Content save(Content entity, MultipartFile photo) throws Exception { //save with photo
+    public Content save(ContentDTO entityDTO, MultipartFile photo) throws Exception {
         User user = userService.getUserFromJWT();
 
         if (photo.isEmpty()) {
             throw new RuntimeException("Photo is empty");
         }
+
+        // Extract content from DTO
+        Content entity = entityDTO.getContent();
+
+        // Set required fields
         entity.setUser(user);
         entity.setVotes(new ArrayList<>());
         entity.setNrComments(0);
         entity.setNrVotes(0);
-        entity.setTags(new ArrayList<>());
         entity.setCreatedAt(LocalDateTime.now());
-        //the encoder puts "/" in the string, so we replace it with "." to avoid path problems
-        String imageHashed = passwordEncoder.encode(entity.getId() +
-                user.getUsername()).replace("/", ".");
 
+        // Initialize tags if null
+        if (entity.getTags() == null) {
+            entity.setTags(new ArrayList<>());
+        }
+
+        // Generate unique image name and upload photo
+        String imageHashed = passwordEncoder.encode(System.currentTimeMillis() +
+                user.getUsername()).replace("/", ".");
         String url = storageS3Service.uploadFile(photo, imageHashed);
         entity.setUrlPhoto(url);
-        System.out.println(entity);
+
         try {
-            return repository.save(entity);
+            // Save content first
+            Content savedContent = repository.save(entity);
+
+            // Process all tags from the DTO
+            for (Tag tagItem : entityDTO.getTag()) {
+                if (tagItem.getName() != null && !tagItem.getName().isEmpty()) {
+                    Tag tag = tagService.findByNameOrCreate(tagItem.getName());
+
+                    // Add bidirectional relationship
+                    if (tag.getContents() == null) {
+                        tag.setContents(new ArrayList<>());
+                    }
+                    tag.getContents().add(savedContent);
+
+                    if (!savedContent.getTags().contains(tag)) {
+                        savedContent.getTags().add(tag);
+                    }
+                }
+            }
+
+            // Save again to update tags
+            savedContent = repository.save(savedContent);
+            return savedContent;
         } catch (Exception e) {
+            // Delete uploaded file if saving fails
             storageS3Service.deleteFile(imageHashed);
             throw new RuntimeException("Error while saving content with file: " + e.getMessage());
         }
@@ -113,7 +149,6 @@ public class ContentService extends AbstractService<Content, ContentRepository> 
 
     public List<Content> getAllLimited() throws IOException {
         Pageable pageable = PageRequest.of(0, 5);
-        List<Content> contentList = repository.findAll(pageable).getContent();
-        return contentList;
+        return repository.findAll(pageable).getContent();
     }
 }

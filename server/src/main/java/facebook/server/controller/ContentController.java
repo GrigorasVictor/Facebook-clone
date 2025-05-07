@@ -1,5 +1,6 @@
 package facebook.server.controller;
 
+import facebook.server.dto.ContentDTO;
 import facebook.server.entity.Content;
 import facebook.server.entity.User;
 import facebook.server.service.ContentService;
@@ -25,10 +26,6 @@ public class ContentController extends AbstractController<Content, ContentServic
 
     private static final Logger logger = LoggerFactory.getLogger(ContentController.class);
 
-
-    @Autowired
-    private HttpServletRequest request;
-
     @Override
     public ResponseEntity<Content> add(Content newEntry) {
         User user = userService.getUserFromJWT();
@@ -39,7 +36,7 @@ public class ContentController extends AbstractController<Content, ContentServic
     @PostMapping("/with-file")
     public ResponseEntity<Content> add(
             @RequestPart("photo") MultipartFile photo,
-            @RequestPart("content") Content newEntry) {
+            @RequestPart("content") ContentDTO newEntry) {
         try{
             return new ResponseEntity<>(contentService.save(newEntry, photo), HttpStatus.OK);
         }
