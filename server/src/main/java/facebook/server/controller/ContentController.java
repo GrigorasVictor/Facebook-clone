@@ -27,13 +27,12 @@ public class ContentController extends AbstractController<Content, ContentServic
     private static final Logger logger = LoggerFactory.getLogger(ContentController.class);
 
     @Override
+    @Deprecated
+    @PostMapping("/admin")
     public ResponseEntity<Content> add(Content newEntry) {
-        User user = userService.getUserFromJWT();
-
-        newEntry.setUser(user);
-        return new ResponseEntity<>(contentService.save(newEntry), HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
-    @PostMapping("/with-file")
+    @PostMapping
     public ResponseEntity<Content> add(
             @RequestPart("photo") MultipartFile photo,
             @RequestPart("content") ContentDTO newEntry) {

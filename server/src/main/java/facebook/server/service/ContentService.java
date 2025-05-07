@@ -35,6 +35,7 @@ public class ContentService extends AbstractService<Content, ContentRepository> 
     private TagService tagService;
 
     @Override
+    @Deprecated
     public Content save(Content entity) {
         final String authHeader = request.getHeader("Authorization");
         final String jwtToken = authHeader.substring(7);
@@ -49,19 +50,28 @@ public class ContentService extends AbstractService<Content, ContentRepository> 
         entity.setNrVotes(0);
         entity.setTags(new ArrayList<>());
 
-        //saving the ph
         return repository.save(entity);
     }
 
     public Content save(ContentDTO entityDTO, MultipartFile photo) throws Exception {
         User user = userService.getUserFromJWT();
-
-        if (photo.isEmpty()) {
-            throw new RuntimeException("Photo is empty");
-        }
-
+        String imageHashed = "";
         // Extract content from DTO
         Content entity = entityDTO.getContent();
+
+        // Check content type (true = post, false = comment)
+        boolean isPost = entity.isTypeContent();
+
+        if (!isPost) {
+            if (entity.getParentContentId() == null) {
+                throw new RuntimeException("Comments must have a parent content specified");
+            }
+            Content parentContent = repository.findById(entity.getParentContentId())
+                    .orElseThrow(() -> new RuntimeException("Parent content not found"));
+
+            parentContent.setNrComments(parentContent.getNrComments() + 1);
+            repository.save(parentContent);
+        }
 
         // Set required fields
         entity.setUser(user);
@@ -75,17 +85,17 @@ public class ContentService extends AbstractService<Content, ContentRepository> 
             entity.setTags(new ArrayList<>());
         }
 
-        // Generate unique image name and upload photo
-        String imageHashed = passwordEncoder.encode(System.currentTimeMillis() +
-                user.getUsername()).replace("/", ".");
-        String url = storageS3Service.uploadFile(photo, imageHashed);
-        entity.setUrlPhoto(url);
+        if (!photo.isEmpty()) {
+            // Generate unique image name and upload photo
+            imageHashed = passwordEncoder.encode(System.currentTimeMillis() +
+                    user.getUsername()).replace("/", ".");
+            String url = storageS3Service.uploadFile(photo, imageHashed);
+            entity.setUrlPhoto(url);
+        }
 
         try {
-            // Save content first
             Content savedContent = repository.save(entity);
 
-            // Process all tags from the DTO
             for (Tag tagItem : entityDTO.getTag()) {
                 if (tagItem.getName() != null && !tagItem.getName().isEmpty()) {
                     Tag tag = tagService.findByNameOrCreate(tagItem.getName());
@@ -107,7 +117,9 @@ public class ContentService extends AbstractService<Content, ContentRepository> 
             return savedContent;
         } catch (Exception e) {
             // Delete uploaded file if saving fails
-            storageS3Service.deleteFile(imageHashed);
+            if(!photo.isEmpty()) {
+                storageS3Service.deleteFile(imageHashed);
+            }
             throw new RuntimeException("Error while saving content with file: " + e.getMessage());
         }
     }
@@ -115,14 +127,12 @@ public class ContentService extends AbstractService<Content, ContentRepository> 
     @Override
     public void deleteById(Long id) {
         Content content = repository.findById(id).get();
+        Long userId = userService.getUserIdFromJWT();
 
-        if (content.getUser().getEmail().equals(jwtUtils
-                .extractUsername(request.getHeader("Authorization").substring(7)))) {
-            repository.deleteById(id);
-            return;
+        if (!content.getUser().getId().equals(userId)) {
+            throw new RuntimeException("You are not allowed to delete this content");
         }
-
-        throw new RuntimeException("You are not allowed to delete this content");
+        repository.deleteById(id);
     }
 
     @Override
@@ -151,4 +161,6 @@ public class ContentService extends AbstractService<Content, ContentRepository> 
         Pageable pageable = PageRequest.of(0, 5);
         return repository.findAll(pageable).getContent();
     }
+
+
 }

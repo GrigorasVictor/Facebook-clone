@@ -26,7 +26,7 @@ public class Content {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "title", nullable = false)
+    @Column(name = "title", nullable = true)
     private String title;
 
     @Column(name = "text", columnDefinition = "TEXT")
@@ -61,7 +61,7 @@ public class Content {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @ManyToOne
-    @JoinColumn(name = "parent_id", referencedColumnName = "content_id", nullable = true, updatable = false)
-    private Content parentContent;
+    @JsonProperty("")
+    @Column(name = "parent_content_id", nullable = true)
+    private Long parentContentId;
 }
