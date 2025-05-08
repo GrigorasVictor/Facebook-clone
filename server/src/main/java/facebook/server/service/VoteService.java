@@ -1,6 +1,7 @@
 package facebook.server.service;
 
 import facebook.server.entity.Content;
+import facebook.server.entity.User;
 import facebook.server.entity.Vote;
 import facebook.server.repository.VoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,31 +20,52 @@ public class VoteService extends AbstractService<Vote, VoteRepository>{
 
     @Override
     public Vote save(Vote vote) throws Exception {
-        if (vote.getType() == null || vote.getUser() == null || vote.getContent() == null) {
-            throw new IllegalArgumentException("Vote type, user, or content cannot be null");
+        if (vote.getType() == null  || vote.getContent() == null) {
+            throw new IllegalArgumentException("Vote type or content cannot be null");
         }
 
-        Content content = contentService.getRepository().findById(vote.getContent().getId())
-                        .orElseThrow(() -> new IllegalArgumentException("Content not found"));
+        Content content = contentService.getRepository().findById(vote.getContent().getId()).get();
+        User user = userService.getUserFromJWT();
+        if (content.getId() == null) {
+            throw new IllegalArgumentException("Content ID cannot be null");
+        }
 
-        if(voteRepository.findByUserIdAndContentId(vote.getUser().getId(), vote.getContent().getId()).isPresent()) {
+        if(voteRepository.findByUserIdAndContentId(user.getId(), vote.getContent().getId()).isPresent()) {
             throw new IllegalArgumentException("Vote already exists for this user and content");
         }
-
-        if (contentService.getRepository().findById(content.getId()).isEmpty()) {
-            throw new IllegalArgumentException("Content not found");
-        }
-        if (userService.getRepository().findById(vote.getUser().getId()).isEmpty()) {
-            throw new IllegalArgumentException("User not found");
+        if(content.getUser().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("User cannot vote on their own content");
         }
 
-        if (!Objects.equals(userService.getUserIdFromJWT(), vote.getUser().getId())) {
-            throw new SecurityException("User ID does not match the JWT token");
-        }
-        content.setNrVotes(content.getNrVotes() + 1);
-        contentService.getRepository().save(content);
+        vote.setUser(user);
+        if (vote.getType().equals("UPVOTE")) {
+            content.setNrVotes(content.getNrVotes() + 1);
 
-        return voteRepository.save(vote);
+            User contentUser = content.getUser();
+
+            if(content.isTypeContent()) {
+                userService.updateScore(contentUser, 2.5f);
+            }else{
+                userService.updateScore(contentUser, 5f);
+            }
+        } else if (vote.getType().equals("DOWNVOTE")) {
+            content.setNrVotes(content.getNrVotes() - 1);
+
+            User contentUser = content.getUser();
+            User voterUser = user;
+
+            if(content.isTypeContent()) {
+                userService.updateScore(contentUser, -1.5f);
+            }else {
+                userService.updateScore(contentUser, -2.5f);
+            }
+            userService.updateScore(voterUser, -1.5f);
+        }
+        content.addVote(vote);
+        vote.setContent(content);
+        contentService.getRepository().save(content); //cred ca salveaza de 2 ori
+
+        return vote;
     }
 
     @Override
@@ -54,11 +76,34 @@ public class VoteService extends AbstractService<Vote, VoteRepository>{
         Content content = contentService.getRepository().findById(vote.getContent().getId())
                         .orElseThrow(() -> new IllegalArgumentException("Content not found"));
 
-        if(!Objects.equals(userService.getUserIdFromJWT(), vote.getUser().getId())) {
+        User user = userService.getUserFromJWT();
+        if(!Objects.equals(user.getId(), vote.getUser().getId())) {
             throw new SecurityException("User ID does not match the JWT token");
         }
 
-        content.setNrVotes(content.getNrVotes() - 1);
+        if(content.getUser().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("User cannot vote on their own content");
+        }
+
+        if(vote.getType().equals("UPVOTE")) {
+            content.setNrVotes(content.getNrVotes() - 1);
+            User contentUser = content.getUser();
+            if(content.isTypeContent()) {
+                userService.updateScore(contentUser, -2.5f);
+            }else{
+                userService.updateScore(contentUser, -5f);
+            }
+        } else if (vote.getType().equals("DOWNVOTE")) {
+            content.setNrVotes(content.getNrVotes() + 1);
+            User contentUser = content.getUser();
+            User voterUser = user;
+            if(content.isTypeContent()) {
+                userService.updateScore(contentUser, 1.5f);
+            }else {
+                userService.updateScore(contentUser, 2.5f);
+            }
+            userService.updateScore(voterUser, 1.5f);
+        }
         contentService.getRepository().save(content);
         super.deleteById(id);
     }

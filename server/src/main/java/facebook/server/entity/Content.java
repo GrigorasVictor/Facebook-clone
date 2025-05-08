@@ -61,7 +61,18 @@ public class Content {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @JsonProperty("")
     @Column(name = "parent_content_id", nullable = true)
     private Long parentContentId;
+
+    public void addVote(Vote vote) {
+        if (votes == null) {
+            votes = new ArrayList<>();
+        }
+        votes.add(vote);
+    }
+    public void removeVote(Vote vote) {
+        if (votes != null) {
+            votes.remove(vote);
+        }
+    }
 }

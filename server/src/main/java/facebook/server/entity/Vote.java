@@ -10,10 +10,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "vote")
 @Getter @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "vote")
 public class Vote {
 
     @Id
@@ -21,7 +21,7 @@ public class Vote {
     @Column(name = "vote_id")
     private Long id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

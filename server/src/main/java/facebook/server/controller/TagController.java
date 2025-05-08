@@ -6,8 +6,7 @@ import facebook.server.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -31,5 +30,16 @@ public class TagController extends AbstractController<Tag, TagService> {
     @Override
     public ResponseEntity<List<Tag>> getAll() {
         return super.getAll();
+    }
+
+    @GetMapping("from-content/{contentId}")
+    public ResponseEntity<List<Tag>> getTagByContentId(@PathVariable Long contentId) {
+        List<Tag> tags = tagService.getFromContentId(contentId);
+        if (tags != null) {
+            return new ResponseEntity<>(tags, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
     }
 }

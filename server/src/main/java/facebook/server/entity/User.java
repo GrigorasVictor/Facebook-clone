@@ -48,7 +48,11 @@ public class User implements UserDetails {
     @JsonProperty("created_at")
     private String createdAt;
 
+    @Column(name = "banned", nullable = false, columnDefinition = "boolean default false")
+    private boolean banned;
 
+    @Column(name = "score", nullable = false, columnDefinition = "int float 0")
+    private float score;
 
     @Override
     @JsonIgnore

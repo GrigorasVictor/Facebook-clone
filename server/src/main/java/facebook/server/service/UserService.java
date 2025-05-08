@@ -95,4 +95,10 @@ public class UserService extends AbstractService<User, AbstractRepository<User>>
         return user;
     }
 
+    public float updateScore(User user, float score){
+        user.setScore(user.getScore() + score);
+        userRepository.save(user);
+        return user.getScore();
+    }
+
 }
