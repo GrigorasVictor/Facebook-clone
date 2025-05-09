@@ -127,9 +127,9 @@ public class ContentService extends AbstractService<Content, ContentRepository> 
     @Override
     public void deleteById(Long id) {
         Content content = repository.findById(id).get();
-        Long userId = userService.getUserIdFromJWT();
+        User user = userService.getUserFromJWT();
 
-        if (!content.getUser().getId().equals(userId)) {
+        if (!content.getUser().getId().equals(user.getId()) && !user.getRole().equals("ADMIN")) {
             throw new RuntimeException("You are not allowed to delete this content");
         }
         repository.deleteById(id);
@@ -137,12 +137,9 @@ public class ContentService extends AbstractService<Content, ContentRepository> 
 
     @Override
     public Content update(Long id, Content entity) {
-        if(entity.getUser() == null){
-            throw new RuntimeException("You are not allowed to update this content");
-        }
+        User user = userService.getUserFromJWT();
 
-        if (!entity.getUser().getEmail().equals(jwtUtils
-                .extractUsername(request.getHeader("Authorization").substring(7)))) {
+        if (!entity.getUser().getId().equals(user.getId()) && !user.getRole().equals("ADMIN")) {
             throw new RuntimeException("You are not allowed to update this content");
         }
         if(repository.findById(id).isEmpty())
@@ -153,12 +150,15 @@ public class ContentService extends AbstractService<Content, ContentRepository> 
         target.setText(entity.getText());
         target.setTitle(entity.getTitle());
         target.setTags(entity.getTags());
+        target.setCreatedAt(LocalDateTime.now());
+        target.setUser(user);
 
         return repository.save(target);
     }
 
     public List<Content> getAllLimited(int cursor) throws IOException {
-        Pageable pageable = PageRequest.of(cursor, 5);
+        Pageable pageable = PageRequest.of(cursor, 5,
+                org.springframework.data.domain.Sort.by("createdAt").descending());
         return repository.findAll(pageable).getContent();
     }
 

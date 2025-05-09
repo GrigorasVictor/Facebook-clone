@@ -29,7 +29,6 @@ public class VoteService extends AbstractService<Vote, VoteRepository>{
         if (content.getId() == null) {
             throw new IllegalArgumentException("Content ID cannot be null");
         }
-
         if(voteRepository.findByUserIdAndContentId(user.getId(), vote.getContent().getId()).isPresent()) {
             throw new IllegalArgumentException("Vote already exists for this user and content");
         }
@@ -38,33 +37,25 @@ public class VoteService extends AbstractService<Vote, VoteRepository>{
         }
 
         vote.setUser(user);
+        content.setNrVotes(content.getNrVotes() + 1);
+
         if (vote.getType().equals("UPVOTE")) {
-            content.setNrVotes(content.getNrVotes() + 1);
 
             User contentUser = content.getUser();
+            float score = content.isTypeContent() ? 2.5f : 5f;
+            userService.updateScore(contentUser, score);
 
-            if(content.isTypeContent()) {
-                userService.updateScore(contentUser, 2.5f);
-            }else{
-                userService.updateScore(contentUser, 5f);
-            }
         } else if (vote.getType().equals("DOWNVOTE")) {
-            content.setNrVotes(content.getNrVotes() - 1);
-
             User contentUser = content.getUser();
-            User voterUser = user;
 
-            if(content.isTypeContent()) {
-                userService.updateScore(contentUser, -1.5f);
-            }else {
-                userService.updateScore(contentUser, -2.5f);
-            }
-            userService.updateScore(voterUser, -1.5f);
+            userService.updateScore(user, -1.5f); // voter score
+            float score = content.isTypeContent() ? -1.5f : -2.5f;
+            userService.updateScore(contentUser, score);
         }
+
         content.addVote(vote);
         vote.setContent(content);
         contentService.getRepository().save(content); //cred ca salveaza de 2 ori
-
         return vote;
     }
 
@@ -85,24 +76,18 @@ public class VoteService extends AbstractService<Vote, VoteRepository>{
             throw new IllegalArgumentException("User cannot vote on their own content");
         }
 
+        content.setNrVotes(content.getNrVotes() - 1);
         if(vote.getType().equals("UPVOTE")) {
-            content.setNrVotes(content.getNrVotes() - 1);
+
             User contentUser = content.getUser();
-            if(content.isTypeContent()) {
-                userService.updateScore(contentUser, -2.5f);
-            }else{
-                userService.updateScore(contentUser, -5f);
-            }
+            float score = content.isTypeContent() ? -2.5f : -5f;
+            userService.updateScore(contentUser, score);
+
         } else if (vote.getType().equals("DOWNVOTE")) {
-            content.setNrVotes(content.getNrVotes() + 1);
+
             User contentUser = content.getUser();
-            User voterUser = user;
-            if(content.isTypeContent()) {
-                userService.updateScore(contentUser, 1.5f);
-            }else {
-                userService.updateScore(contentUser, 2.5f);
-            }
-            userService.updateScore(voterUser, 1.5f);
+            float score = content.isTypeContent() ? 1.5f : 2.5f;
+            userService.updateScore(contentUser, score);
         }
         contentService.getRepository().save(content);
         super.deleteById(id);
