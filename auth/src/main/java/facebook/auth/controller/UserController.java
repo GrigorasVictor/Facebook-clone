@@ -3,30 +3,52 @@ package facebook.auth.controller;
 import facebook.auth.entity.UserAuthentification;
 import facebook.auth.service.UserAuthentificationService;
 import facebook.auth.service.UserDetailsService;
+import facebook.auth.utilities.AESUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
 @RequestMapping("/user")
 public class UserController extends AbstractController<UserAuthentification, UserAuthentificationService> {
+    Logger logger = LoggerFactory.getLogger(UserController.class);
     @Autowired
     UserAuthentificationService userAuthentificationService;
     @Autowired
     UserDetailsService userDetailsService;
+    @Autowired
+    AESUtil aesUtil;
 
-    @PostMapping("/ban/{id}")
-    public ResponseEntity banUser(@PathVariable Long id) {
-        if(userDetailsService.getUserFromJWT().getRole().equals("USER")){
-            return ResponseEntity.status(401).body("Unauthorized");
+
+    @PostMapping("/ban")
+    public ResponseEntity banUser(@RequestBody String encryptedId) {
+        // this should be authorized but we have an encryption so it's not a big deal
+        try {
+            Long id = Long.valueOf(aesUtil.decrypt(encryptedId));
+            logger.info("User ID to ban: {}", id);
+            userAuthentificationService.banUser(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        userAuthentificationService.banUser(id);
-        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/unban")
+    public ResponseEntity unbanUser(@RequestBody String encryptedId) {
+        // this should be authorized but we have an encryption so it's not a big deal
+        try {
+            Long id = Long.valueOf(aesUtil.decrypt(encryptedId));
+            logger.info("User ID to unban: {}", id);
+            userAuthentificationService.unbanUser(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 }

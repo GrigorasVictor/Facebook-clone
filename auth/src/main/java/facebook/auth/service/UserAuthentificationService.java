@@ -78,6 +78,11 @@ public class UserAuthentificationService extends AbstractService<UserAuthentific
 
             var user = userAuthentificationRepository.findByEmail(authDTO.getEmail())
                                                                 .orElseThrow();
+            if(user.isBanned()){
+                response.withStatusCode(403)
+                        .withMessage("User is banned!");
+                return response.build();
+            }
             var jwt = jwtUtils.generateToken(user);
             var refreshToken = jwtUtils.generateRefreshToken(new HashMap<>(), user);
             response.withStatusCode(200)
@@ -133,18 +138,30 @@ public class UserAuthentificationService extends AbstractService<UserAuthentific
                     response.getBody()));
         }
         if (response.getStatusCodeValue() != 200) {
-            throw new Exception(String.format("[%d] %s",
-                    response.getStatusCodeValue(),
+             throw new Exception(String.format("[%d] %s",
+                                     response.getStatusCodeValue(),
                     response.getBody()));
-        }
+}
 
         return response.getBody();
     }
 
     public boolean banUser(Long id){
         try {
+
             UserAuthentification user = userAuthentificationRepository.findById(id).orElseThrow();
             user.setBanned(true);
+            userAuthentificationRepository.save(user);
+            return true;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+    public boolean unbanUser(Long id){
+        try {
+            UserAuthentification user = userAuthentificationRepository.findById(id).orElseThrow();
+            user.setBanned(false);
             userAuthentificationRepository.save(user);
             return true;
         } catch (Exception e) {
