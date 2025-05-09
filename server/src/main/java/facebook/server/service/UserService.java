@@ -52,6 +52,9 @@ public class UserService extends AbstractService<User, AbstractRepository<User>>
 
         return userRepository.findByEmail(jwtUtils.extractUsername(jwtToken)).get();
     }
+    public String getJWT(){
+        return request.getHeader("Authorization").substring(7);
+    }
 
     @Transactional
     public void processPayload(String payload) throws Exception {
@@ -101,4 +104,21 @@ public class UserService extends AbstractService<User, AbstractRepository<User>>
         return user.getScore();
     }
 
+    public void banUser(Long id) throws Exception {
+        Optional<User> user = userRepository.findById(id);
+        if(user.isEmpty()) {
+            throw new Exception("User not found!");
+        }
+        user.get().setBanned(true);
+        userRepository.save(user.get());
+    }
+
+    public void unbanUser(Long id) throws Exception {
+        Optional<User> user = userRepository.findById(id);
+        if(user.isEmpty()) {
+            throw new Exception("User not found!");
+        }
+        user.get().setBanned(false);
+        userRepository.save(user.get());
+    }
 }

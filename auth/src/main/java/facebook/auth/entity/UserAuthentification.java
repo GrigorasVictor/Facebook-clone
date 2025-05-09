@@ -46,6 +46,9 @@ public class UserAuthentification implements UserDetails{
     @JsonProperty("created_at")
     private String createdAt;
 
+    @Column(name = "banned", nullable = false, columnDefinition = "boolean default false")
+    private boolean banned;
+
     @Override
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {

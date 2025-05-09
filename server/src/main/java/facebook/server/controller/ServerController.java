@@ -1,19 +1,22 @@
 package facebook.server.controller;
 
 import facebook.server.dto.UserDTO;
+import facebook.server.service.ServerService;
 import facebook.server.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/server")
 public class ServerController {
+    Logger logger = LoggerFactory.getLogger(ServerController.class);
     @Autowired
     UserService userService;
+    @Autowired
+    ServerService serverService;
 
     @PostMapping
     public ResponseEntity<String> receivePayload(@RequestBody String payload) {
@@ -31,5 +34,19 @@ public class ServerController {
         }
         return ResponseEntity.ok("Payload received!");
     }
+
+    @PostMapping("user/ban/{id}")
+    public ResponseEntity banPayload(@PathVariable Long id) {
+        try {
+            userService.banUser(id);
+            serverService.sendBanPayload(id);
+            logger.info("User banned: {}", id);
+            return ResponseEntity.ok("User with ID " + id + " has been banned.");
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }
 

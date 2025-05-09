@@ -2,10 +2,8 @@ package facebook.server.controller;
 
 import facebook.server.dto.ContentDTO;
 import facebook.server.entity.Content;
-import facebook.server.entity.User;
 import facebook.server.service.ContentService;
 import facebook.server.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

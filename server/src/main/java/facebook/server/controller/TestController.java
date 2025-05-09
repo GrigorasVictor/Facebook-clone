@@ -54,6 +54,4 @@ public class TestController {
                 imageBytes,
                 headers, HttpStatus.OK);
     }
-
-
 }

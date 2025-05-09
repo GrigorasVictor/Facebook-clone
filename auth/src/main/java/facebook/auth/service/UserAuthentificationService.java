@@ -139,5 +139,17 @@ public class UserAuthentificationService extends AbstractService<UserAuthentific
 
         return response.getBody();
     }
+
+    public boolean banUser(Long id){
+        try {
+            UserAuthentification user = userAuthentificationRepository.findById(id).orElseThrow();
+            user.setBanned(true);
+            userAuthentificationRepository.save(user);
+            return true;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
 }
 
