@@ -157,8 +157,8 @@ public class ContentService extends AbstractService<Content, ContentRepository> 
         return repository.save(target);
     }
 
-    public List<Content> getAllLimited() throws IOException {
-        Pageable pageable = PageRequest.of(0, 5);
+    public List<Content> getAllLimited(int cursor) throws IOException {
+        Pageable pageable = PageRequest.of(cursor, 5);
         return repository.findAll(pageable).getContent();
     }
 

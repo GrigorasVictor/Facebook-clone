@@ -64,11 +64,10 @@ public class ContentController extends AbstractController<Content, ContentServic
         }
     }
 
-    @Override
-    @Deprecated
-    public ResponseEntity<List<Content>> getAll() {
+    @GetMapping("/from/{cursor}")
+    public ResponseEntity<List<Content>> getAll(@PathVariable int cursor) {
         try{
-            List<Content> content = contentService.getAllLimited();
+            List<Content> content = contentService.getAllLimited(cursor);
             return new ResponseEntity<>(content, HttpStatus.OK);
         } catch (Exception e) {
             logger.error("Error while getting all content: {}", e.getMessage(), e);
