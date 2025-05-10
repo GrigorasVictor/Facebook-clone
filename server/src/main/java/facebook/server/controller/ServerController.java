@@ -1,6 +1,5 @@
 package facebook.server.controller;
 
-import facebook.server.dto.UserDTO;
 import facebook.server.service.ServerService;
 import facebook.server.service.UserService;
 import org.slf4j.Logger;
