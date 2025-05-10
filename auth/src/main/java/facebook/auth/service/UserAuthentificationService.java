@@ -2,6 +2,7 @@ package facebook.auth.service;
 
 import facebook.auth.dto.AuthDTO;
 import facebook.auth.dto.RegisterDTO;
+import facebook.auth.dto.ResetDTO;
 import facebook.auth.dto.UserDTO;
 import facebook.auth.entity.User;
 import facebook.auth.entity.UserAuthentification;
@@ -19,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 
 @Service
@@ -34,6 +36,9 @@ public class UserAuthentificationService extends AbstractService<UserAuthentific
     private PasswordEncoder passwordEncoder;
     @Autowired
     private AESUtil aesUtil;
+    @Autowired
+    private EmailService emailService;
+
 
     public UserDTO register(RegisterDTO registerDTO) {
         DTOBuilder response = new DTOBuilder();
@@ -167,6 +172,39 @@ public class UserAuthentificationService extends AbstractService<UserAuthentific
             System.out.println(e.getMessage());
             return false;
         }
+    }
+
+    public void sendPasswordResetEmail(String email) {
+        String generatedCode = String.valueOf((int) (Math.random() * 1000000));
+        UserAuthentification user = userAuthentificationRepository.findByEmail(email).orElseThrow(); //for production
+        user.setResetCode(generatedCode);
+        user.setResetExpiration(LocalDateTime.now().plusMinutes(15));
+
+        userAuthentificationRepository.save(user);
+        //emailService.sendVerificationCode(user.getEmail(), generatedCode); // for production
+        emailService.sendVerificationCode("victorandrei201112@gmail.com", generatedCode);
+    }
+
+    public void resetPassword(ResetDTO resetDTO) {
+        if(resetDTO == null || resetDTO.getEmail().isEmpty() ||
+                resetDTO.getNewPassword().isEmpty() || resetDTO.getResetCode().isEmpty()) {
+            throw new RuntimeException("Invalid reset request");
+        }
+        UserAuthentification user = userAuthentificationRepository.findByEmail(resetDTO.getEmail()).orElseThrow();
+
+        if(user.getResetExpiration() == null || user.getResetCode() == null) {
+            throw new RuntimeException("No reset code generated");
+        }
+        if(user.getResetExpiration().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Reset code expired");
+        }
+        if(!user.getResetCode().equals(resetDTO.getResetCode())) {
+            throw new RuntimeException("Invalid reset code");
+        }
+        user.setPassword(passwordEncoder.encode(resetDTO.getNewPassword()));
+        user.setResetCode(null);
+        user.setResetExpiration(null);
+        userAuthentificationRepository.save(user);
     }
 }
 

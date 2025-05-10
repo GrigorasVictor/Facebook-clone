@@ -11,6 +11,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -48,6 +49,12 @@ public class UserAuthentification implements UserDetails{
 
     @Column(name = "banned", nullable = false, columnDefinition = "boolean default false")
     private boolean banned;
+
+    @Column(name = "reset_code", nullable = true)
+    private String resetCode;
+
+    @Column(name = "reset_expiration", nullable = true)
+    private LocalDateTime resetExpiration;
 
     @Override
     @JsonIgnore
