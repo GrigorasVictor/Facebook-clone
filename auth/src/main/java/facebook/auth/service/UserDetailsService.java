@@ -31,4 +31,8 @@ public class UserDetailsService implements org.springframework.security.core.use
 
         return userRepository.findByEmail(jwtUtils.extractUsername(jwtToken)).get();
     }
+
+    public UserAuthentification getUser(Long id){
+        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+    }
 }

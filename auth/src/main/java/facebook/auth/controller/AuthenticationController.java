@@ -2,9 +2,12 @@ package facebook.auth.controller;
 
 import facebook.auth.dto.AuthDTO;
 import facebook.auth.dto.RegisterDTO;
+import facebook.auth.dto.ResetDTO;
 import facebook.auth.dto.UserDTO;
 import facebook.auth.entity.User;
 import facebook.auth.service.UserAuthentificationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/auth")
 public class AuthenticationController {
+    private final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
     @Autowired
     UserAuthentificationService userService;
 
@@ -45,7 +49,7 @@ public class AuthenticationController {
 
             return ResponseEntity.ok(userDTO);
         }catch (Exception e){
-            System.out.println(e.getMessage());
+            logger.error(e.getMessage());
             if(user != null)
                 userService.getUserAuthentificationRepository()
                                 .delete(userService.getUserAuthentificationRepository()
@@ -54,6 +58,25 @@ public class AuthenticationController {
         }
     }
 
+    @PostMapping("/forgot")
+    public ResponseEntity<String> forgotPassword(@RequestBody String email) {
+        if(email == null || email.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        userService.sendPasswordResetEmail(email);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reset")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetDTO resetDTO) {
+        try {
+            userService.resetPassword(resetDTO);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
 }
 
