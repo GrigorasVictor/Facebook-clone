@@ -74,27 +74,23 @@ public class UserService extends AbstractService<User, AbstractRepository<User>>
         System.out.println("User saved successfully!");
     }
 
-    @Transactional
-    public User savePhoto(MultipartFile photo){
-        if (photo.isEmpty()) return null;
+    public User savePhoto(MultipartFile photo)throws Exception{
+        if (photo.isEmpty())
+            throw new Exception("File is empty!");
+
         final String jwtToken = request.getHeader("Authorization")
                                         .substring(7);
-        if (jwtToken.isEmpty()) return null;
-        Long userId = userRepository
-                            .findByEmail(jwtUtils.extractUsername(jwtToken))
-                            .get().getId();
-        Optional<User> optUser = userRepository.findById(userId);
-        if (optUser.isEmpty()) return null;
-        User user = optUser.get();
+        if (jwtToken.isEmpty())
+            throw new Exception("Token is empty!");
+        User user  = getUserFromJWT();
 
         //the encoder puts "/" in the string, so we replace it with "." to avoid path problems
-        String imageHashed = passwordEncoder.encode(userId +
+        String imageHashed = passwordEncoder.encode(user.getId() +
                                         user.getUsername()).replace("/", ".");
 
-        storageS3Service.uploadFile(photo, imageHashed);
-        user.setUrlPhoto(imageHashed);
+        String url = storageS3Service.uploadFile(photo, imageHashed);
+        user.setUrlPhoto(url);
         userRepository.save(user);
-        user.setPassword("");
         return user;
     }
 
