@@ -51,7 +51,7 @@ public class User implements UserDetails {
     @Column(name = "banned", nullable = false, columnDefinition = "boolean default false")
     private boolean banned;
 
-    @Column(name = "score", nullable = false, columnDefinition = "int float 0")
+    @Column(name = "score", nullable = false, columnDefinition = "float default 0")
     private float score;
 
     @Override

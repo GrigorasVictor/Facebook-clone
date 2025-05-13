@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import AuthService from '../services/AuthService';
 import './Login.css';
 
@@ -7,15 +7,36 @@ function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Check if user is already logged in
+    if (AuthService.isAuthenticated()) {
+      navigate('/');
+    }
+
+    // Check for registration success message
+    if (location.state?.message) {
+      setError(location.state.message);
+    }
+  }, [navigate, location]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
+
     try {
-      await AuthService.login(email, password);
+      const response = await AuthService.login(email, password);
+      if (response) {
       navigate('/');
+      }
     } catch (err) {
-      setError('Invalid email or password');
+      setError(err.message || 'An error occurred during login');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -25,20 +46,32 @@ function Login() {
         <h1 className="facebook-logo">facebook</h1>
         <form onSubmit={handleLogin}>
           <input
-            type="text"
-            placeholder="Mobile number or email address"
+            type="email"
+            placeholder="Email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
+            required
           />
           <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
+            required
           />
-          {error && <div className="error-message">{error}</div>}
-          <button type="submit" className="login-button">
-            Log In
+          {error && (
+            <div className={`message ${error.includes('successful') ? 'success-message' : 'error-message'}`}>
+              {error}
+            </div>
+          )}
+          <button 
+            type="submit" 
+            className="login-button"
+            disabled={loading}
+          >
+            {loading ? 'Logging in...' : 'Log In'}
           </button>
           <div className="forgot-password">
             <a href="/forgot-password">Forgotten password?</a>
@@ -50,6 +83,7 @@ function Login() {
             type="button"
             className="create-account-button"
             onClick={() => navigate('/register')}
+            disabled={loading}
           >
             Create New Account
           </button>
