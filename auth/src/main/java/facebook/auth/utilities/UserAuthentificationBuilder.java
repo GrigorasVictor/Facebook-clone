@@ -3,6 +3,7 @@ package facebook.auth.utilities;
 import facebook.auth.entity.UserAuthentification;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class UserAuthentificationBuilder {
     private final UserAuthentification user;
@@ -13,7 +14,7 @@ public class UserAuthentificationBuilder {
         user.setEmail("default@example.com");
         user.setPassword("securepassword");
         user.setRole("USER");
-        user.setCreatedAt(LocalDateTime.now().toString());
+        user.setCreatedAt(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
     }
 
     public UserAuthentificationBuilder withUsername(String username) {
@@ -30,10 +31,12 @@ public class UserAuthentificationBuilder {
         user.setPassword(password);
         return this;
     }
+
     public UserAuthentificationBuilder withRole(String role) {
         user.setRole(role);
         return this;
     }
+
     public UserAuthentification build() {
         return user;
     }

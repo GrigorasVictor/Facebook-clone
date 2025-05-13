@@ -2,25 +2,52 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:8080/auth/';
 
-// Configurare axios pentru a gestiona CORS
+// Configure axios defaults
 axios.defaults.withCredentials = true;
+axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 class AuthService {
   async login(email, password) {
     try {
+      console.log('Attempting login with:', { email });
       const response = await axios.post(API_URL + 'login', {
         email,
         password
       });
       
-      if (response.data.token) {
-        localStorage.setItem('user', JSON.stringify(response.data));
-        return response.data;
+      console.log('Login response:', response.data);
+      
+      if (response.data.statusCode === 200 && response.data.token) {
+        // Store the complete response data
+        const userData = {
+          token: response.data.token,
+          refreshToken: response.data.refreshToken,
+          expirationTime: response.data.expirationTime,
+          user: response.data.user,
+          message: response.data.message
+        };
+        localStorage.setItem('user', JSON.stringify(userData));
+        return userData;
       } else {
         throw new Error(response.data.message || 'Login failed');
       }
     } catch (error) {
-      throw error.response?.data || error.message;
+      console.error('Login error:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
+      // Handle specific error cases
+      if (error.response?.status === 401) {
+        throw new Error('Invalid email or password');
+      } else if (error.response?.status === 404) {
+        throw new Error('Account not found');
+      } else if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      } else {
+        throw new Error('Login failed. Please try again.');
+      }
     }
   }
 
@@ -30,49 +57,35 @@ class AuthService {
 
   async register(username, email, password) {
     try {
-      console.log('Attempting to register with:', { username, email }); // pentru debug
-      
+      console.log('Sending register request:', { username, email, password });
       const response = await axios.post(API_URL + 'register', {
         username,
         email,
         password
       });
-      
-      console.log('Register response:', response.data); // pentru debug
-      
+      console.log('Register response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Registration error:', error.response || error); // pentru debug
-      
-      if (error.response) {
-        // Eroare de la server
-        throw {
-          message: error.response.data.message || 'Registration failed',
-          statusCode: error.response.status
-        };
-      } else if (error.request) {
-        // Eroare de rețea
-        throw {
-          message: 'Network error - please check your connection',
-          statusCode: 0
-        };
-      } else {
-        // Altă eroare
-        throw {
+      console.error('Register error:', {
           message: error.message,
-          statusCode: 0
-        };
-      }
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      throw error;
     }
   }
 
   getCurrentUser() {
-    return JSON.parse(localStorage.getItem('user'));
+    const user = localStorage.getItem('user');
+    if (user) {
+      return JSON.parse(user);
+  }
+    return null;
   }
 
-  getToken() {
+  isAuthenticated() {
     const user = this.getCurrentUser();
-    return user?.token;
+    return user !== null;
   }
 }
 
