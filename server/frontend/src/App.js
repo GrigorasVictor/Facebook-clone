@@ -3,12 +3,21 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
+import Profile from './pages/Profile';
+import Navbar from './components/Navbar';
 import AuthService from './services/AuthService';
 import './App.css';
 
 function PrivateRoute({ children }) {
-  const auth = AuthService.getCurrentUser();
-  return auth ? children : <Navigate to="/login" />;
+  const isAuthenticated = AuthService.isAuthenticated();
+  return isAuthenticated ? (
+    <>
+      <Navbar />
+      {children}
+    </>
+  ) : (
+    <Navigate to="/login" />
+  );
 }
 
 function App() {
@@ -22,6 +31,14 @@ function App() {
           element={
             <PrivateRoute>
               <Home />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <Profile />
             </PrivateRoute>
           }
         />

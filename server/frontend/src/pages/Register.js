@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthService from '../services/AuthService';
 import './Register.css';
@@ -13,6 +13,13 @@ function Register() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user is already logged in
+    if (AuthService.isAuthenticated()) {
+      navigate('/');
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -44,27 +51,30 @@ function Register() {
       return false;
     }
 
+    if (formData.username.length < 3) {
+      setError('Username must be at least 3 characters long');
+      return false;
+    }
+
     return true;
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
+    
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
 
     try {
-      console.log('Submitting form data:', { 
-        username: formData.username, 
-        email: formData.email 
-      }); // pentru debug
-
       const response = await AuthService.register(
         formData.username,
         formData.email,
         formData.password
       );
-
-      console.log('Registration response:', response); // pentru debug
 
       if (response.statusCode === 200) {
         navigate('/login', {
@@ -74,7 +84,6 @@ function Register() {
         setError(response.message || 'Registration failed');
       }
     } catch (err) {
-      console.error('Registration error:', err); // pentru debug
       setError(err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
@@ -96,6 +105,8 @@ function Register() {
             value={formData.username}
             onChange={handleChange}
             disabled={loading}
+            required
+            minLength={3}
           />
           <input
             type="email"
@@ -104,6 +115,7 @@ function Register() {
             value={formData.email}
             onChange={handleChange}
             disabled={loading}
+            required
           />
           <input
             type="password"
@@ -112,6 +124,8 @@ function Register() {
             value={formData.password}
             onChange={handleChange}
             disabled={loading}
+            required
+            minLength={6}
           />
           <input
             type="password"
@@ -120,6 +134,8 @@ function Register() {
             value={formData.confirmPassword}
             onChange={handleChange}
             disabled={loading}
+            required
+            minLength={6}
           />
           
           {error && <div className="error-message">{error}</div>}

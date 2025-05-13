@@ -1,25 +1,43 @@
 import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import AuthService from '../services/AuthService';
 import './Navbar.css';
 
 function Navbar() {
+  const navigate = useNavigate();
+  const user = AuthService.getCurrentUser();
+
+  const handleLogout = () => {
+    AuthService.logout();
+    navigate('/login');
+  };
+
+  if (!user) {
+    return null;
+  }
+
   return (
     <nav className="navbar">
-      <div className="navbar-container">
         <div className="navbar-left">
-          <h1 className="navbar-logo">Facebook</h1>
+        <Link to="/" className="logo">
+          <h1>facebook</h1>
+        </Link>
         </div>
+
         <div className="navbar-right">
-          <ul className="nav-menu">
-            <li className="nav-item">
-              <a href="/" className="nav-link">Home</a>
-            </li>
-            <li className="nav-item">
-              <a href="/profile" className="nav-link">Profile</a>
-            </li>
-            <li className="nav-item">
-              <a href="/login" className="nav-link">Login</a>
-            </li>
-          </ul>
+        <div className="nav-icons">
+          <Link to="/" className="nav-item">
+            <i className="fas fa-home"></i>
+            <span>Home</span>
+          </Link>
+          <Link to="/profile" className="nav-item">
+            <i className="fas fa-user"></i>
+            <span>Profile</span>
+          </Link>
+          <div className="nav-item" onClick={handleLogout}>
+            <i className="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </div>
         </div>
       </div>
     </nav>
