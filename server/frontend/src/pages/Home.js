@@ -8,7 +8,6 @@ function Home() {
   const [userData, setUserData] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [newPost, setNewPost] = useState({
-    title: '',
     text: '',
     photo: null
   });
@@ -16,31 +15,66 @@ function Home() {
   const [photoPreview, setPhotoPreview] = useState(null);
   const [posts, setPosts] = useState([]);
   const [avatarUrls, setAvatarUrls] = useState({});
+  const [tagInput, setTagInput] = useState('');
+  const [tags, setTags] = useState([]);
+  const [allTags, setAllTags] = useState([]);
+  const [selectedTag, setSelectedTag] = useState(null);
+  const [cursor, setCursor] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     const user = AuthService.getCurrentUser();
     if (user) {
       setUserData(user);
-      fetchPosts();
+      fetchPosts(0, true);
     }
   }, []);
 
-  const fetchPosts = async () => {
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const user = AuthService.getCurrentUser();
+        const response = await fetch('http://localhost:8081/tag', {
+          headers: {
+            'Authorization': `Bearer ${user?.token}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setAllTags(data);
+        }
+      } catch (error) {
+        console.error('Error fetching tags:', error);
+      }
+    };
+    fetchTags();
+  }, []);
+
+  const fetchPosts = async (page = 0, initial = false) => {
     try {
       const user = AuthService.getCurrentUser();
-      const response = await fetch('http://localhost:8081/content', {
+      const response = await fetch(`http://localhost:8081/content/from/${page}`, {
         headers: {
           'Authorization': `Bearer ${user?.token}`
         }
       });
       if (response.ok) {
         const data = await response.json();
-        setPosts(data);
-        // Fetch avatars for all posts
-        fetchAvatars(data);
+        if (initial) {
+          setPosts(data);
+          setCursor(1);
+        } else {
+          setPosts(prev => [...prev, ...data]);
+          setCursor(prev => prev + 1);
+        }
+        setHasMore(data.length === 5);
+        fetchAvatars(initial ? data : [...posts, ...data]);
       }
     } catch (error) {
       console.error('Error fetching posts:', error);
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -49,18 +83,22 @@ function Home() {
     const newAvatarUrls = {};
     await Promise.all(postsData.map(async (post) => {
       if (post.user && post.user.url_photo) {
-        try {
-          const response = await fetch(`http://localhost:8081/user/photo/${post.user.url_photo}`, {
-            headers: {
-              'Authorization': `Bearer ${user?.token}`
+        if (post.user.url_photo.startsWith('http://') || post.user.url_photo.startsWith('https://')) {
+          newAvatarUrls[post.id] = post.user.url_photo;
+        } else {
+          try {
+            const response = await fetch(`http://localhost:8081/user/photo/${post.user.url_photo}`, {
+              headers: {
+                'Authorization': `Bearer ${user?.token}`
+              }
+            });
+            if (response.ok) {
+              const blob = await response.blob();
+              newAvatarUrls[post.id] = URL.createObjectURL(blob);
             }
-          });
-          if (response.ok) {
-            const blob = await response.blob();
-            newAvatarUrls[post.id] = URL.createObjectURL(blob);
+          } catch (err) {
+            newAvatarUrls[post.id] = null;
           }
-        } catch (err) {
-          newAvatarUrls[post.id] = null;
         }
       }
     }));
@@ -91,6 +129,28 @@ function Home() {
     }
   };
 
+  const handleTagInputChange = (e) => {
+    setTagInput(e.target.value);
+  };
+
+  const handleTagKeyDown = (e) => {
+    if ((e.key === 'Enter' || e.key === ',') && tagInput.trim() !== '') {
+      e.preventDefault();
+      addTag(tagInput.trim());
+    }
+  };
+
+  const addTag = (tag) => {
+    if (tag && !tags.includes(tag)) {
+      setTags([...tags, tag]);
+    }
+    setTagInput('');
+  };
+
+  const removeTag = (tagToRemove) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -105,7 +165,6 @@ function Home() {
     const formData = new FormData();
     const contentData = {
       content: {
-        title: newPost.title,
         text: newPost.text,
         typeContent: true,
         status: "active",
@@ -114,7 +173,7 @@ function Home() {
         votes: [],
         tags: []
       },
-      tag: []
+      tag: tags.map(tag => ({ name: tag }))
     };
 
     formData.append('content', new Blob([JSON.stringify(contentData)], {
@@ -137,10 +196,12 @@ function Home() {
       });
 
       if (response.ok) {
-        setNewPost({ title: '', text: '', photo: null });
+        setNewPost({ text: '', photo: null });
         setPhotoPreview(null);
         setShowModal(false);
-        fetchPosts();
+        setTags([]);
+        setTagInput('');
+        fetchPosts(0, true);
       } else {
         const errorText = await response.text();
         console.error('Failed to create post:', errorText);
@@ -156,9 +217,22 @@ function Home() {
 
   const handleCloseModal = () => {
     setShowModal(false);
-    setNewPost({ title: '', text: '', photo: null });
+    setNewPost({ text: '', photo: null });
     setPhotoPreview(null);
+    setTags([]);
+    setTagInput('');
   };
+
+  const handleLoadMore = () => {
+    setLoadingMore(true);
+    fetchPosts(cursor, false);
+  };
+
+  const filteredPosts = selectedTag
+    ? posts.filter(post => post.tags && post.tags.some(tag => tag.name === selectedTag))
+    : posts;
+
+  const sortedPosts = [...filteredPosts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   if (!userData) {
     return <div>Loading...</div>;
@@ -174,8 +248,26 @@ function Home() {
           </button>
         </div>
 
+        <div className="tag-cloud">
+          <button
+            className={`tag-cloud-btn${selectedTag === null ? ' selected' : ''}`}
+            onClick={() => setSelectedTag(null)}
+          >
+            Toate
+          </button>
+          {allTags.map(tag => (
+            <button
+              key={tag.id}
+              className={`tag-cloud-btn${selectedTag === tag.name ? ' selected' : ''}`}
+              onClick={() => setSelectedTag(tag.name)}
+            >
+              {tag.name}
+            </button>
+          ))}
+        </div>
+
         <div className="posts-feed">
-          {posts.map(post => (
+          {sortedPosts.map(post => (
             <div key={post.id} className="post-card">
               <div className="post-header">
                 <div className="post-user-info">
@@ -189,14 +281,24 @@ function Home() {
                   <div className="user-details">
                     <span className="username">{post.user?.username || 'Anonymous'}</span>
                     <span className="post-time">
-                      {new Date(post.createdAt).toLocaleDateString()}
+                      {post.createdAt ?
+                        new Date(post.createdAt).toLocaleString('ro-RO', {
+                          day: '2-digit', month: '2-digit', year: 'numeric',
+                          hour: '2-digit', minute: '2-digit'
+                        }) : ''}
                     </span>
                   </div>
                 </div>
               </div>
               <div className="post-content">
-                <h3>{post.title}</h3>
-                <p>{post.text}</p>
+                <p className="post-description">{post.text}</p>
+                {post.tags && post.tags.length > 0 && (
+                  <div className="post-tag-list">
+                    {post.tags.map(tag => (
+                      <span key={tag.id || tag.name} className="post-tag-item">#{tag.name}</span>
+                    ))}
+                  </div>
+                )}
                 {post.urlPhoto && (
                   <div className="post-image-container">
                     <img src={post.urlPhoto} alt="Post" className="post-image" />
@@ -205,6 +307,11 @@ function Home() {
               </div>
             </div>
           ))}
+          {hasMore && (
+            <button className="post-button" style={{margin: '24px auto 0 auto', display: 'block'}} onClick={handleLoadMore} disabled={loadingMore}>
+              {loadingMore ? 'Loading...' : 'Load More'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -219,14 +326,6 @@ function Home() {
             </div>
             <form onSubmit={handleSubmit}>
               <div className="post-input">
-                <input
-                  type="text"
-                  name="title"
-                  placeholder="Post title..."
-                  value={newPost.title}
-                  onChange={handleInputChange}
-                  required
-                />
                 <textarea
                   name="text"
                   placeholder="What's on your mind?"
@@ -260,6 +359,27 @@ function Home() {
                       style={{ display: 'none' }}
                     />
                   </label>
+                  <div className="tag-input-container">
+                    <input
+                      type="text"
+                      placeholder="Add tag and press Enter or ,"
+                      value={tagInput}
+                      onChange={handleTagInputChange}
+                      onKeyDown={handleTagKeyDown}
+                      disabled={isSubmitting}
+                    />
+                    <button type="button" onClick={() => addTag(tagInput.trim())} disabled={!tagInput.trim() || isSubmitting}>
+                      Add Tag
+                    </button>
+                  </div>
+                  <div className="tag-list">
+                    {tags.map(tag => (
+                      <span key={tag} className="tag-item">
+                        {tag}
+                        <button type="button" className="remove-tag" onClick={() => removeTag(tag)}>&times;</button>
+                      </span>
+                    ))}
+                  </div>
                   <button 
                     type="submit" 
                     className={`post-button ${isSubmitting ? 'submitting' : ''}`}
