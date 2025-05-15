@@ -87,11 +87,10 @@ public class FriendService extends AbstractService<Friend, FriendRepository> {
 
         if (existingFriendship.isPresent()) {
             Friend friendship = existingFriendship.get();
-            if (currentUserId.equals(friendship.getUser1().getId())) {
-                friendship.setUser1Status(Friend.FriendshipStatus.REJECTED);
-            } else {
-                friendship.setUser2Status(Friend.FriendshipStatus.REJECTED);
-            }
+
+            boolean isUser1 = currentUserId.equals(friendship.getUser1().getId());
+            friendship.setUser1Status(isUser1 ? Friend.FriendshipStatus.REJECTED : Friend.FriendshipStatus.PENDING);
+            friendship.setUser2Status(isUser1 ? Friend.FriendshipStatus.PENDING : Friend.FriendshipStatus.REJECTED);
             friendRepository.save(friendship);
         } else {
             throw new Exception("Friendship not found");
