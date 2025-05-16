@@ -44,10 +44,17 @@ public class UserAuthentificationService extends AbstractService<UserAuthentific
         DTOBuilder response = new DTOBuilder();
 
         try {
+            if(registerDTO == null || registerDTO.getEmail().isEmpty() || registerDTO.getPassword().isEmpty()
+                    || registerDTO.getUsername().isEmpty() || registerDTO.getPhoneNumber().isEmpty()) {
+                return response.withStatusCode(400)
+                        .withMessage("Invalid register request!").build();
+            }
+
             UserAuthentification user = new UserAuthentificationBuilder()
                     .withUsername(registerDTO.getUsername())
                     .withEmail(registerDTO.getEmail())
                     .withPassword(passwordEncoder.encode(registerDTO.getPassword()))
+                    .withPhoneNumber(registerDTO.getPhoneNumber())
                     .build();
 
             if(userAuthentificationRepository.findByEmail(user.getEmail()).isPresent()) {

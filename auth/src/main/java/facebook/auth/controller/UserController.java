@@ -2,6 +2,7 @@ package facebook.auth.controller;
 
 import facebook.auth.entity.UserAuthentification;
 import facebook.auth.service.EmailService;
+import facebook.auth.service.SmsService;
 import facebook.auth.service.UserAuthentificationService;
 import facebook.auth.service.UserDetailsService;
 import facebook.auth.utilities.AESUtil;
@@ -24,6 +25,8 @@ public class UserController extends AbstractController<UserAuthentification, Use
     AESUtil aesUtil;
     @Autowired
     EmailService emailService;
+    @Autowired
+    SmsService smsService;
 
 
 
@@ -35,7 +38,10 @@ public class UserController extends AbstractController<UserAuthentification, Use
             logger.info("User ID to ban: {}", id);
             userAuthentificationService.banUser(id);
             emailService.sendBanEmail("victorandrei201112@gmail.com");
+            smsService.sendSms("+18777804236", "You have been banned from Facebook application!");
+
             //emailService.sendBanEmail(userDetailsService.getUser(id).getEmail());
+            //smsService.sendSms(userDetailsService.getUser(id).getPhoneNumber(), "You have been banned from Facebook application!");
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -51,7 +57,10 @@ public class UserController extends AbstractController<UserAuthentification, Use
             logger.info("User ID to unban: {}", id);
             userAuthentificationService.unbanUser(id);
             emailService.sendUnbanEmail("victorandrei201112@gmail.com");
+            smsService.sendSms("+18777804236", "You have been un2banned from Facebook application!");
+
             //emailService.sendUnbanEmail(userDetailsService.getUser(id).getEmail());
+            //smsService.sendSms(userDetailsService.getUser(id).getPhoneNumber(), "You have been unbanned from Facebook application!");
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             logger.error(e.getMessage());

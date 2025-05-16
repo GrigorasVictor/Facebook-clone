@@ -43,6 +43,10 @@ public class UserAuthentification implements UserDetails{
     @JsonProperty("role")
     private String role;
 
+    @Column(name = "phone_number", nullable = true)
+    @JsonProperty("phone_number")
+    private String phoneNumber;
+
     @Column(name = "created_at", nullable = false)
     @JsonProperty("created_at")
     private String createdAt;

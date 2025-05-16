@@ -1,6 +1,6 @@
 package facebook.auth.dto;
 
-import lombok.Data;
+import lombok.Data; //
 
 @Data
 public class AuthDTO {
