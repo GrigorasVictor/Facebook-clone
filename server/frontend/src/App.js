@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
+import Friends from './pages/Friends';
 import Navbar from './components/Navbar';
 import AuthService from './services/AuthService';
 import './App.css';
@@ -39,6 +40,14 @@ function App() {
           element={
             <PrivateRoute>
               <Profile />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/friends"
+          element={
+            <PrivateRoute>
+              <Friends />
             </PrivateRoute>
           }
         />

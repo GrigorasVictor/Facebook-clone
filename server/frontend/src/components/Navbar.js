@@ -30,6 +30,10 @@ function Navbar() {
             <i className="fas fa-home"></i>
             <span>Home</span>
           </Link>
+          <Link to="/friends" className="nav-item">
+            <i className="fas fa-users"></i>
+            <span>Friends</span>
+          </Link>
           <Link to="/profile" className="nav-item">
             <i className="fas fa-user"></i>
             <span>Profile</span>

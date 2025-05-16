@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthService from '../services/AuthService';
+import UsersPanel from '../components/UsersPanel';
 import './Home.css';
 
 function Home() {
@@ -62,7 +63,7 @@ function Home() {
       if (response.ok) {
         const data = await response.json();
         if (initial) {
-          setPosts(data);
+        setPosts(data);
           setCursor(1);
         } else {
           setPosts(prev => [...prev, ...data]);
@@ -86,18 +87,18 @@ function Home() {
         if (post.user.url_photo.startsWith('http://') || post.user.url_photo.startsWith('https://')) {
           newAvatarUrls[post.id] = post.user.url_photo;
         } else {
-          try {
-            const response = await fetch(`http://localhost:8081/user/photo/${post.user.url_photo}`, {
-              headers: {
-                'Authorization': `Bearer ${user?.token}`
-              }
-            });
-            if (response.ok) {
-              const blob = await response.blob();
-              newAvatarUrls[post.id] = URL.createObjectURL(blob);
+        try {
+          const response = await fetch(`http://localhost:8081/user/photo/${post.user.url_photo}`, {
+            headers: {
+              'Authorization': `Bearer ${user?.token}`
             }
-          } catch (err) {
-            newAvatarUrls[post.id] = null;
+          });
+          if (response.ok) {
+            const blob = await response.blob();
+            newAvatarUrls[post.id] = URL.createObjectURL(blob);
+          }
+        } catch (err) {
+          newAvatarUrls[post.id] = null;
           }
         }
       }
@@ -240,79 +241,82 @@ function Home() {
 
   return (
     <div className="home-container">
-      <div className="feed-container">
-        <div className="create-post-button-container">
-          <button className="create-post-button" onClick={() => setShowModal(true)}>
-            <i className="fas fa-plus"></i>
-            Create Post
-          </button>
-        </div>
-
-        <div className="tag-cloud">
-          <button
-            className={`tag-cloud-btn${selectedTag === null ? ' selected' : ''}`}
-            onClick={() => setSelectedTag(null)}
-          >
-            Toate
-          </button>
-          {allTags.map(tag => (
-            <button
-              key={tag.id}
-              className={`tag-cloud-btn${selectedTag === tag.name ? ' selected' : ''}`}
-              onClick={() => setSelectedTag(tag.name)}
-            >
-              {tag.name}
+      <div className="home-main-content">
+        <div className="feed-container">
+          <div className="create-post-button-container">
+            <button className="create-post-button" onClick={() => setShowModal(true)}>
+              <i className="fas fa-plus"></i>
+              Create Post
             </button>
-          ))}
-        </div>
+          </div>
 
-        <div className="posts-feed">
-          {sortedPosts.map(post => (
-            <div key={post.id} className="post-card">
-              <div className="post-header">
-                <div className="post-user-info">
-                  <div className="user-avatar">
-                    {avatarUrls[post.id] ? (
-                      <img src={avatarUrls[post.id]} alt={post.user?.username} className="user-avatar-image" />
-                    ) : (
-                      <i className="fas fa-user"></i>
-                    )}
-                  </div>
-                  <div className="user-details">
-                    <span className="username">{post.user?.username || 'Anonymous'}</span>
-                    <span className="post-time">
-                      {post.createdAt ?
-                        new Date(post.createdAt).toLocaleString('ro-RO', {
-                          day: '2-digit', month: '2-digit', year: 'numeric',
-                          hour: '2-digit', minute: '2-digit'
-                        }) : ''}
-                    </span>
+          <div className="tag-cloud">
+            <button
+              className={`tag-cloud-btn${selectedTag === null ? ' selected' : ''}`}
+              onClick={() => setSelectedTag(null)}
+            >
+              Toate
+            </button>
+            {allTags.map(tag => (
+              <button
+                key={tag.id}
+                className={`tag-cloud-btn${selectedTag === tag.name ? ' selected' : ''}`}
+                onClick={() => setSelectedTag(tag.name)}
+              >
+                {tag.name}
+              </button>
+            ))}
+          </div>
+
+          <div className="posts-feed">
+            {sortedPosts.map(post => (
+              <div key={post.id} className="post-card">
+                <div className="post-header">
+                  <div className="post-user-info">
+                    <div className="user-avatar">
+                      {avatarUrls[post.id] ? (
+                        <img src={avatarUrls[post.id]} alt={post.user?.username} className="user-avatar-image" />
+                      ) : (
+                        <i className="fas fa-user"></i>
+                      )}
+                    </div>
+                    <div className="user-details">
+                      <span className="username">{post.user?.username || 'Anonymous'}</span>
+                      <span className="post-time">
+                        {post.createdAt ?
+                          new Date(post.createdAt).toLocaleString('ro-RO', {
+                            day: '2-digit', month: '2-digit', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit'
+                          }) : ''}
+                      </span>
+                    </div>
                   </div>
                 </div>
+                <div className="post-content">
+                  <p className="post-description">{post.text}</p>
+                  {post.tags && post.tags.length > 0 && (
+                    <div className="post-tag-list">
+                      {post.tags.map(tag => (
+                        <span key={tag.id || tag.name} className="post-tag-item">#{tag.name}</span>
+                      ))}
+                    </div>
+                  )}
+                  {post.urlPhoto && (
+                    <div className="post-image-container">
+                      <img src={post.urlPhoto} alt="Post" className="post-image" />
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="post-content">
-                <p className="post-description">{post.text}</p>
-                {post.tags && post.tags.length > 0 && (
-                  <div className="post-tag-list">
-                    {post.tags.map(tag => (
-                      <span key={tag.id || tag.name} className="post-tag-item">#{tag.name}</span>
-                    ))}
-                  </div>
-                )}
-                {post.urlPhoto && (
-                  <div className="post-image-container">
-                    <img src={post.urlPhoto} alt="Post" className="post-image" />
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-          {hasMore && (
-            <button className="post-button" style={{margin: '24px auto 0 auto', display: 'block'}} onClick={handleLoadMore} disabled={loadingMore}>
-              {loadingMore ? 'Loading...' : 'Load More'}
-            </button>
-          )}
+            ))}
+            {hasMore && (
+              <button className="post-button" style={{margin: '24px auto 0 auto', display: 'block'}} onClick={handleLoadMore} disabled={loadingMore}>
+                {loadingMore ? 'Loading...' : 'Load More'}
+              </button>
+            )}
+          </div>
         </div>
+        <UsersPanel />
       </div>
 
       {showModal && (

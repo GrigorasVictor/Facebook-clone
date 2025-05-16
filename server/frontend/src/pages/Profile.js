@@ -20,24 +20,24 @@ function Profile() {
       return;
     }
     setIsImageLoading(true);
-    try {
+          try {
       const response = await fetch(`http://localhost:8081/user/photo/${photoName}`, {
-        headers: {
+              headers: {
           'Authorization': `Bearer ${token}`
-        }
-      });
-      if (response.ok) {
-        const blob = await response.blob();
+              }
+            });
+            if (response.ok) {
+              const blob = await response.blob();
         const blobUrl = URL.createObjectURL(blob);
         setImageBlobUrl(blobUrl);
         console.log("[fetchImage] Image fetched successfully. Blob URL:", blobUrl);
-      } else {
+            } else {
         console.error("[fetchImage] Failed to fetch profile image. Status:", response.status, "Text:", response.statusText);
-        setImageBlobUrl(null);
-      }
-    } catch (err) {
+              setImageBlobUrl(null);
+            }
+          } catch (err) {
       console.error('Error fetching profile image:', err);
-      setImageBlobUrl(null);
+            setImageBlobUrl(null);
     } finally {
       setIsImageLoading(false);
     }
@@ -70,7 +70,7 @@ function Profile() {
           fetchImage(data.url_photo, currentUser.token);
         } else {
           setImageBlobUrl(null);
-        }
+    }
       } catch (err) {
         console.error("Error fetching profile:", err);
         setError(err.message || "An error occurred while fetching user data.");
@@ -135,10 +135,10 @@ function Profile() {
       // If upload is OK (200), backend has updated the user's url_photo.
       // Now, re-fetch user data to get the new url_photo.
       const refreshedUserResponse = await fetch('http://localhost:8081/user/me', {
-        headers: {
+            headers: {
           'Authorization': `Bearer ${currentUser.token}`
-        }
-      });
+            }
+          });
 
       if (!refreshedUserResponse.ok) {
         throw new Error('Failed to refresh user data after photo upload.');
@@ -252,12 +252,12 @@ function Profile() {
           </div>
           {/* Upload Controls */}
           <div className="upload-controls">
-            <input 
-              type="file" 
+            <input
+              type="file"
               id="photo-upload-input"
-              accept="image/*" 
-              onChange={handleFileChange} 
-              style={{ display: 'none' }} 
+              accept="image/*"
+              onChange={handleFileChange}
+              style={{ display: 'none' }}
               disabled={isUploading}
             />
             <label htmlFor="photo-upload-input" className={`upload-button ${isUploading ? 'disabled' : ''}`}>
@@ -271,7 +271,7 @@ function Profile() {
           </div>
         </div>
       </div>
-      
+
       <div className="profile-content">
         <div className="profile-section">
           <h2>About</h2>

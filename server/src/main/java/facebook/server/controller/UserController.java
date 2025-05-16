@@ -15,6 +15,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/user")
 public class UserController extends AbstractController<User, UserService> {
@@ -42,5 +45,6 @@ public class UserController extends AbstractController<User, UserService> {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     //TODO: user-ul normal n-are voie sa adauge sau sa stearga useri, update-ul numa daca este pe el insusi(din token)
 }
