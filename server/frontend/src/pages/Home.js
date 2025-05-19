@@ -31,6 +31,7 @@ function Home() {
   useEffect(() => {
     const user = AuthService.getCurrentUser();
     if (user) {
+      console.log('Current user data:', user);
       setUserData(user);
       fetchPosts(0, true);
     }
@@ -82,6 +83,7 @@ function Home() {
       });
       if (response.ok) {
         const data = await response.json();
+        console.log('Fetched posts:', data);
         if (initial) {
           setPosts(data);
           setCursor(1);
@@ -255,9 +257,13 @@ function Home() {
   const filteredPosts = selectedTag
     ? posts.filter(post =>
         post.tags && post.tags.some(tag => tag.name === selectedTag) &&
-        post.user && (friendIds.includes(post.user.id) || post.user.id === userData.id)
+        post.user && (friendIds.includes(post.user.id) || post.user.id === userData?.user?.id)
       )
-    : posts.filter(post => post.user && (friendIds.includes(post.user.id) || post.user.id === userData.id));
+    : posts.filter(post => post.user && (friendIds.includes(post.user.id) || post.user.id === userData?.user?.id));
+
+  console.log('Friend IDs:', friendIds);
+  console.log('User ID:', userData?.user?.id);
+  console.log('Filtered posts:', filteredPosts);
 
   const sortedPosts = [...filteredPosts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
