@@ -83,14 +83,16 @@ function Home() {
       if (response.ok) {
         const data = await response.json();
         if (initial) {
-        setPosts(data);
+          setPosts(data);
           setCursor(1);
+          setHasMore(data.length === 5);
+          fetchAvatars(data);
         } else {
           setPosts(prev => [...prev, ...data]);
           setCursor(prev => prev + 1);
+          setHasMore(data.length === 5);
+          fetchAvatars([...posts, ...data]);
         }
-        setHasMore(data.length === 5);
-        fetchAvatars(initial ? data : [...posts, ...data]);
       }
     } catch (error) {
       console.error('Error fetching posts:', error);
@@ -253,9 +255,9 @@ function Home() {
   const filteredPosts = selectedTag
     ? posts.filter(post =>
         post.tags && post.tags.some(tag => tag.name === selectedTag) &&
-        post.user && friendIds.includes(post.user.id)
+        post.user && (friendIds.includes(post.user.id) || post.user.id === userData.id)
       )
-    : posts.filter(post => post.user && friendIds.includes(post.user.id));
+    : posts.filter(post => post.user && (friendIds.includes(post.user.id) || post.user.id === userData.id));
 
   const sortedPosts = [...filteredPosts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
@@ -295,56 +297,69 @@ function Home() {
         </div>
 
         <div className="posts-feed">
-            {sortedPosts.map(post => (
-            <div key={post.id} className="post-card">
-              <div className="post-header">
-                <div className="post-user-info">
-                  <div className="user-avatar">
-                    {avatarUrls[post.id] ? (
-                      <img src={avatarUrls[post.id]} alt={post.user?.username} className="user-avatar-image" />
-                    ) : (
-                      <i className="fas fa-user"></i>
-                    )}
-                  </div>
-                  <div className="user-details">
-                    <span className="username">{post.user?.username || 'Anonymous'}</span>
-                    <span className="post-time">
-                        {post.createdAt ?
-                          new Date(post.createdAt).toLocaleString('ro-RO', {
-                            day: '2-digit', month: '2-digit', year: 'numeric',
-                            hour: '2-digit', minute: '2-digit'
-                          }) : ''}
-                    </span>
+            {sortedPosts.length > 0 ? (
+              <>
+                {sortedPosts.map(post => (
+                <div key={post.id} className="post-card">
+                  <div className="post-header">
+                    <div className="post-user-info">
+                      <div className="user-avatar">
+                        {avatarUrls[post.id] ? (
+                          <img src={avatarUrls[post.id]} alt={post.user?.username} className="user-avatar-image" />
+                        ) : (
+                          <i className="fas fa-user"></i>
+                        )}
+                      </div>
+                      <div className="user-details">
+                        <span className="username">{post.user?.username || 'Anonymous'}</span>
+                        <span className="post-time">
+                            {post.createdAt ?
+                              new Date(post.createdAt).toLocaleString('ro-RO', {
+                                day: '2-digit', month: '2-digit', year: 'numeric',
+                                hour: '2-digit', minute: '2-digit'
+                              }) : ''}
+                        </span>
+                        </div>
+                      </div>
                     </div>
+                    <div className="post-content">
+                      <p className="post-description">{post.text}</p>
+                      {post.tags && post.tags.length > 0 && (
+                        <div className="post-tag-list">
+                          {post.tags.map(tag => (
+                            <span key={tag.id || tag.name} className="post-tag-item">#{tag.name}</span>
+                          ))}
+                    </div>
+                      )}
+                    {post.urlPhoto && (
+                      <div className="post-image-container">
+                        <img src={post.urlPhoto} alt="Post" className="post-image" />
+                      </div>
+                    )}
+                    <button
+                      className="post-comment-btn"
+                      onClick={() => { setActivePostId(post.id); setCommentModalOpen(true); }}
+                    >
+                      <i className="fas fa-comment-alt"></i> Comentarii ({post.nrComments})
+                    </button>
                   </div>
                 </div>
-                <div className="post-content">
-                  <p className="post-description">{post.text}</p>
-                  {post.tags && post.tags.length > 0 && (
-                    <div className="post-tag-list">
-                      {post.tags.map(tag => (
-                        <span key={tag.id || tag.name} className="post-tag-item">#{tag.name}</span>
-                      ))}
-              </div>
-                  )}
-                {post.urlPhoto && (
-                  <div className="post-image-container">
-                    <img src={post.urlPhoto} alt="Post" className="post-image" />
-                  </div>
+              ))}
+                {hasMore && (
+                  <button 
+                    className="post-button" 
+                    style={{margin: '24px auto 0 auto', display: 'block'}} 
+                    onClick={handleLoadMore} 
+                    disabled={loadingMore}
+                  >
+                    {loadingMore ? 'Loading...' : 'Load More'}
+                  </button>
                 )}
-                <button
-                  className="post-comment-btn"
-                  onClick={() => { setActivePostId(post.id); setCommentModalOpen(true); }}
-                >
-                  <i className="fas fa-comment-alt"></i> Comentarii ({post.nrComments})
-                </button>
+              </>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px', color: '#65676b' }}>
+                No posts to display
               </div>
-            </div>
-          ))}
-            {hasMore && (
-              <button className="post-button" style={{margin: '24px auto 0 auto', display: 'block'}} onClick={handleLoadMore} disabled={loadingMore}>
-                {loadingMore ? 'Loading...' : 'Load More'}
-              </button>
             )}
           </div>
         </div>
