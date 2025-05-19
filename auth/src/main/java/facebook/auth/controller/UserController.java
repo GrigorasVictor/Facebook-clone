@@ -31,39 +31,31 @@ public class UserController extends AbstractController<UserAuthentification, Use
 
 
     @PostMapping("/ban")
-    public ResponseEntity banUser(@RequestBody String encryptedId) {
-        // this should be authorized but we have an encryption so it's not a big deal
+    public ResponseEntity banUser(@RequestBody String idString) {
         try {
-            Long id = Long.valueOf(aesUtil.decrypt(encryptedId));
+            Long id = Long.valueOf(idString.trim());
             logger.info("User ID to ban: {}", id);
             userAuthentificationService.banUser(id);
             emailService.sendBanEmail("victorandrei201112@gmail.com");
             smsService.sendSms("+18777804236", "You have been banned from Facebook application!");
-
-            //emailService.sendBanEmail(userDetailsService.getUser(id).getEmail());
-            //smsService.sendSms(userDetailsService.getUser(id).getPhoneNumber(), "You have been banned from Facebook application!");
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error("Eroare la banUser:", e);
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @PostMapping("/unban")
-    public ResponseEntity unbanUser(@RequestBody String encryptedId) {
-        // this should be authorized but we have an encryption so it's not a big deal
+    public ResponseEntity unbanUser(@RequestBody String idString) {
         try {
-            Long id = Long.valueOf(aesUtil.decrypt(encryptedId));
+            Long id = Long.valueOf(idString.trim());
             logger.info("User ID to unban: {}", id);
             userAuthentificationService.unbanUser(id);
             emailService.sendUnbanEmail("victorandrei201112@gmail.com");
             smsService.sendSms("+18777804236", "You have been un2banned from Facebook application!");
-
-            //emailService.sendUnbanEmail(userDetailsService.getUser(id).getEmail());
-            //smsService.sendSms(userDetailsService.getUser(id).getPhoneNumber(), "You have been unbanned from Facebook application!");
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error("Eroare la unbanUser:", e);
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

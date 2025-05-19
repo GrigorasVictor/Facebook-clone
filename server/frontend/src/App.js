@@ -5,6 +5,9 @@ import Register from './pages/Register';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Friends from './pages/Friends';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import AdminAuthPanel from './pages/AdminAuthPanel';
 import Navbar from './components/Navbar';
 import AuthService from './services/AuthService';
 import './App.css';
@@ -51,6 +54,9 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route path="/forgot" element={<ForgotPassword />} />
+        <Route path="/reset" element={<ResetPassword />} />
+        <Route path="/admin-auth" element={<AdminAuthPanel />} />
       </Routes>
     </Router>
   );

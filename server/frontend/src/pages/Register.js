@@ -8,7 +8,8 @@ function Register() {
     username: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    phoneNumber: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -73,7 +74,8 @@ function Register() {
       const response = await AuthService.register(
         formData.username,
         formData.email,
-        formData.password
+        formData.password,
+        formData.phoneNumber
       );
 
       if (response.statusCode === 200) {
@@ -136,6 +138,14 @@ function Register() {
             disabled={loading}
             required
             minLength={6}
+          />
+          <input
+            type="text"
+            name="phoneNumber"
+            placeholder="Phone number"
+            value={formData.phoneNumber}
+            onChange={handleChange}
+            disabled={loading}
           />
           
           {error && <div className="error-message">{error}</div>}

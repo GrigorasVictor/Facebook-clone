@@ -18,16 +18,24 @@ class AuthService {
       console.log('Login response:', response.data);
       
       if (response.data.statusCode === 200 && response.data.token) {
-        // Store the complete response data
-        const userData = {
+        // Dacă backend-ul va include userul direct în răspuns, poți folosi direct:
+        // const userObj = { ...response.data };
+        // localStorage.setItem('user', JSON.stringify(userObj));
+        // return userObj;
+        // Acum, facem request suplimentar la /user/me:
+        const userResponse = await fetch('http://localhost:8081/user/me', {
+          headers: { 'Authorization': `Bearer ${response.data.token}` }
+        });
+        const userData = await userResponse.json();
+        const userObj = {
           token: response.data.token,
           refreshToken: response.data.refreshToken,
           expirationTime: response.data.expirationTime,
-          user: response.data.user,
+          user: userData,
           message: response.data.message
         };
-        localStorage.setItem('user', JSON.stringify(userData));
-        return userData;
+        localStorage.setItem('user', JSON.stringify(userObj));
+        return userObj;
       } else {
         throw new Error(response.data.message || 'Login failed');
       }
@@ -43,6 +51,8 @@ class AuthService {
         throw new Error('Invalid email or password');
       } else if (error.response?.status === 404) {
         throw new Error('Account not found');
+      } else if (error.response?.status === 403) {
+        throw new Error('Contul tău este banat!');
       } else if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
       } else {
@@ -55,13 +65,14 @@ class AuthService {
     localStorage.removeItem('user');
   }
 
-  async register(username, email, password) {
+  async register(username, email, password, phoneNumber = "") {
     try {
-      console.log('Sending register request:', { username, email, password });
+      console.log('Sending register request:', { username, email, password, phoneNumber });
       const response = await axios.post(API_URL + 'register', {
         username,
         email,
-        password
+        password,
+        phoneNumber
       });
       console.log('Register response:', response.data);
       return response.data;
@@ -86,6 +97,45 @@ class AuthService {
   isAuthenticated() {
     const user = this.getCurrentUser();
     return user !== null;
+  }
+
+  getCurrentUserRole() {
+    const user = this.getCurrentUser();
+    if (user && user.user && user.user.role) {
+      return user.user.role;
+    }
+    return null;
+  }
+
+  async forgotPassword(email) {
+    try {
+      const response = await axios.post(API_URL + 'forgot', email, {
+        headers: { 'Content-Type': 'text/plain' }
+      });
+      return response.status === 200;
+    } catch (error) {
+      if (error.response?.status === 400) {
+        throw new Error('Please enter a valid email address.');
+      } else {
+        throw new Error('Failed to send reset email. Please try again.');
+      }
+    }
+  }
+
+  async resetPassword(email, newPassword, resetCode) {
+    try {
+      const response = await axios.post(API_URL + 'reset', {
+        email,
+        newPassword,
+        resetCode
+      });
+      return response.status === 200;
+    } catch (error) {
+      if (error.response?.data) {
+        throw new Error(error.response.data);
+      }
+      throw new Error('Failed to reset password. Please try again.');
+    }
   }
 }
 

@@ -162,5 +162,8 @@ public class ContentService extends AbstractService<Content, ContentRepository> 
         return repository.findAll(pageable).getContent();
     }
 
+    public List<Content> getCommentsForContent(Long parentContentId) {
+        return repository.findByParentContentId(parentContentId);
+    }
 
 }

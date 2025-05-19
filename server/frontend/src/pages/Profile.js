@@ -299,7 +299,7 @@ function Profile() {
           </div>
           */}
         </div>
-        
+
         {/* We will add image upload and display here later */}
         {/* 
         <div className="profile-section">
@@ -307,24 +307,6 @@ function Profile() {
           <p>(Image functionality will be added here)</p>
         </div>
         */}
-
-        <div className="profile-section">
-          <h2>Activity</h2>
-          <div className="activity-stats">
-            <div className="stat-item">
-              <span className="stat-number">0</span>
-              <span className="stat-label">Posts</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-number">0</span>
-              <span className="stat-label">Friends</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-number">0</span>
-              <span className="stat-label">Photos</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

@@ -73,8 +73,8 @@ function Login() {
           >
             {loading ? 'Logging in...' : 'Log In'}
           </button>
-          <div className="forgot-password">
-            <a href="/forgot-password">Forgotten password?</a>
+          <div className="forgot-link">
+            <a href="/forgot">Forgot password?</a>
           </div>
           <div className="divider">
             <span>or</span>

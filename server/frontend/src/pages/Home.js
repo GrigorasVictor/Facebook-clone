@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthService from '../services/AuthService';
 import UsersPanel from '../components/UsersPanel';
+import CommentModal from '../components/CommentModal';
 import './Home.css';
 
 function Home() {
@@ -23,6 +24,9 @@ function Home() {
   const [cursor, setCursor] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [friendIds, setFriendIds] = useState([]);
+  const [commentModalOpen, setCommentModalOpen] = useState(false);
+  const [activePostId, setActivePostId] = useState(null);
 
   useEffect(() => {
     const user = AuthService.getCurrentUser();
@@ -50,6 +54,22 @@ function Home() {
       }
     };
     fetchTags();
+  }, []);
+
+  useEffect(() => {
+    // Fetch friend ids
+    const fetchFriends = async () => {
+      const user = AuthService.getCurrentUser();
+      if (!user?.token) return;
+      const response = await fetch('http://localhost:8081/friend/mutual', {
+        headers: { 'Authorization': `Bearer ${user.token}` }
+      });
+      if (response.ok) {
+        const friends = await response.json();
+        setFriendIds(friends.map(f => f.id));
+      }
+    };
+    fetchFriends();
   }, []);
 
   const fetchPosts = async (page = 0, initial = false) => {
@@ -229,11 +249,17 @@ function Home() {
     fetchPosts(cursor, false);
   };
 
+  // DOAR POSTĂRILE DE LA PRIETENI
   const filteredPosts = selectedTag
-    ? posts.filter(post => post.tags && post.tags.some(tag => tag.name === selectedTag))
-    : posts;
+    ? posts.filter(post =>
+        post.tags && post.tags.some(tag => tag.name === selectedTag) &&
+        post.user && friendIds.includes(post.user.id)
+      )
+    : posts.filter(post => post.user && friendIds.includes(post.user.id));
 
   const sortedPosts = [...filteredPosts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  const user = AuthService.getCurrentUser();
 
   if (!userData) {
     return <div>Loading...</div>;
@@ -242,13 +268,13 @@ function Home() {
   return (
     <div className="home-container">
       <div className="home-main-content">
-        <div className="feed-container">
-          <div className="create-post-button-container">
-            <button className="create-post-button" onClick={() => setShowModal(true)}>
-              <i className="fas fa-plus"></i>
-              Create Post
-            </button>
-          </div>
+      <div className="feed-container">
+        <div className="create-post-button-container">
+          <button className="create-post-button" onClick={() => setShowModal(true)}>
+            <i className="fas fa-plus"></i>
+            Create Post
+          </button>
+        </div>
 
           <div className="tag-cloud">
             <button
@@ -266,29 +292,29 @@ function Home() {
                 {tag.name}
               </button>
             ))}
-          </div>
+        </div>
 
-          <div className="posts-feed">
+        <div className="posts-feed">
             {sortedPosts.map(post => (
-              <div key={post.id} className="post-card">
-                <div className="post-header">
-                  <div className="post-user-info">
-                    <div className="user-avatar">
-                      {avatarUrls[post.id] ? (
-                        <img src={avatarUrls[post.id]} alt={post.user?.username} className="user-avatar-image" />
-                      ) : (
-                        <i className="fas fa-user"></i>
-                      )}
-                    </div>
-                    <div className="user-details">
-                      <span className="username">{post.user?.username || 'Anonymous'}</span>
-                      <span className="post-time">
+            <div key={post.id} className="post-card">
+              <div className="post-header">
+                <div className="post-user-info">
+                  <div className="user-avatar">
+                    {avatarUrls[post.id] ? (
+                      <img src={avatarUrls[post.id]} alt={post.user?.username} className="user-avatar-image" />
+                    ) : (
+                      <i className="fas fa-user"></i>
+                    )}
+                  </div>
+                  <div className="user-details">
+                    <span className="username">{post.user?.username || 'Anonymous'}</span>
+                    <span className="post-time">
                         {post.createdAt ?
                           new Date(post.createdAt).toLocaleString('ro-RO', {
                             day: '2-digit', month: '2-digit', year: 'numeric',
                             hour: '2-digit', minute: '2-digit'
                           }) : ''}
-                      </span>
+                    </span>
                     </div>
                   </div>
                 </div>
@@ -299,16 +325,22 @@ function Home() {
                       {post.tags.map(tag => (
                         <span key={tag.id || tag.name} className="post-tag-item">#{tag.name}</span>
                       ))}
-                    </div>
-                  )}
-                  {post.urlPhoto && (
-                    <div className="post-image-container">
-                      <img src={post.urlPhoto} alt="Post" className="post-image" />
-                    </div>
-                  )}
-                </div>
               </div>
-            ))}
+                  )}
+                {post.urlPhoto && (
+                  <div className="post-image-container">
+                    <img src={post.urlPhoto} alt="Post" className="post-image" />
+                  </div>
+                )}
+                <button
+                  className="post-comment-btn"
+                  onClick={() => { setActivePostId(post.id); setCommentModalOpen(true); }}
+                >
+                  <i className="fas fa-comment-alt"></i> Comentarii ({post.nrComments})
+                </button>
+              </div>
+            </div>
+          ))}
             {hasMore && (
               <button className="post-button" style={{margin: '24px auto 0 auto', display: 'block'}} onClick={handleLoadMore} disabled={loadingMore}>
                 {loadingMore ? 'Loading...' : 'Load More'}
@@ -317,6 +349,21 @@ function Home() {
           </div>
         </div>
         <UsersPanel />
+        <CommentModal
+          open={commentModalOpen}
+          onClose={() => setCommentModalOpen(false)}
+          postId={activePostId}
+          userToken={user?.token}
+          onCommentAdded={() => {
+            setPosts(posts =>
+              posts.map(post =>
+                post.id === activePostId
+                  ? { ...post, nrComments: post.nrComments + 1 }
+                  : post
+              )
+            );
+          }}
+        />
       </div>
 
       {showModal && (

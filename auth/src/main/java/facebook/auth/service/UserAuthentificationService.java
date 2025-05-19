@@ -188,8 +188,7 @@ public class UserAuthentificationService extends AbstractService<UserAuthentific
         user.setResetExpiration(LocalDateTime.now().plusMinutes(15));
 
         userAuthentificationRepository.save(user);
-        //emailService.sendVerificationCode(user.getEmail(), generatedCode); // for production
-        emailService.sendVerificationCode("victorandrei201112@gmail.com", generatedCode);
+        emailService.sendVerificationCode(user.getEmail(), generatedCode);
     }
 
     public void resetPassword(ResetDTO resetDTO) {
