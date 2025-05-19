@@ -159,7 +159,7 @@ public class ContentService extends AbstractService<Content, ContentRepository> 
     public List<Content> getAllLimited(int cursor) throws IOException {
         Pageable pageable = PageRequest.of(cursor, 5,
                 org.springframework.data.domain.Sort.by("createdAt").descending());
-        return repository.findAll(pageable).getContent();
+        return repository.findAllByTypeContentIsTrue(pageable).getContent();
     }
 
     public List<Content> getCommentsForContent(Long parentContentId) {
