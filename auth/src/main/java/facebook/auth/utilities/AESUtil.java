@@ -14,7 +14,7 @@ public class AESUtil {
     private static final String ALGORITHM = "AES";
     private SecretKeySpec secretKey;
 
-    @Value("${aes.secret}") // Inject key from application.properties
+    @Value("${aes.secret}")
     private String secret;
 
     @PostConstruct
