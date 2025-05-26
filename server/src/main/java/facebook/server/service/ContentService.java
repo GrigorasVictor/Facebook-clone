@@ -160,7 +160,6 @@ public class ContentService extends AbstractService<Content, ContentRepository> 
         target.setTags(updatedTags);
         
         target.setCreatedAt(LocalDateTime.now());
-        target.setUser(user);
         // Keep the existing photo URL if no new photo is provided
         if (entity.getUrlPhoto() == null) {
             target.setUrlPhoto(target.getUrlPhoto());
