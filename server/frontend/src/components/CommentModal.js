@@ -10,13 +10,39 @@ function CommentModal({ open, onClose, postId, userToken, onCommentAdded }) {
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [imageModal, setImageModal] = useState({ open: false, src: null });
+  const [userVotes, setUserVotes] = useState(() => {
+    const savedVotes = localStorage.getItem('commentVotes');
+    return savedVotes ? JSON.parse(savedVotes) : {};
+  });
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [editComment, setEditComment] = useState({ show: false, comment: null, text: '' });
 
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    setIsAdmin(user?.user?.role === 'ADMIN');
+  }, []);
+
+  useEffect(() => {
+    let intervalId;
+    
     if (open && postId) {
       fetchComments();
+      
+      intervalId = setInterval(() => {
+        fetchComments();
+      }, 5000);
     }
-    // eslint-disable-next-line
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
   }, [open, postId]);
+
+  useEffect(() => {
+    localStorage.setItem('commentVotes', JSON.stringify(userVotes));
+  }, [userVotes]);
 
   const fetchComments = async () => {
     setLoading(true);
@@ -27,12 +53,122 @@ function CommentModal({ open, onClose, postId, userToken, onCommentAdded }) {
       });
       if (!response.ok) throw new Error('Eroare la încărcarea comentariilor');
       const data = await response.json();
-      setComments(data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+      
+      const newUserVotes = { ...userVotes };
+      data.forEach(comment => {
+        const userVote = comment.votes.find(v => v.user.id === JSON.parse(localStorage.getItem('user'))?.user?.id);
+        if (userVote) {
+          newUserVotes[comment.id] = userVote.type;
+        }
+      });
+      setUserVotes(newUserVotes);
+      
+      setComments(data.sort((a, b) => {
+        if (b.nrVotes !== a.nrVotes) {
+          return b.nrVotes - a.nrVotes;
+        }
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }));
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleVote = async (commentId, voteType) => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user?.token) {
+        alert('You must be logged in to vote');
+        return;
+      }
+
+      const comment = comments.find(c => c.id === commentId);
+      if (!comment) return;
+
+      const response = await fetch('http://localhost:8081/vote/add', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          type: voteType,
+          content: { id: commentId }
+        })
+      });
+
+      if (response.ok) {
+        let newVote = null;
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          newVote = await response.json();
+        }
+        
+        setComments(prev => prev.map(c => {
+          if (c.id === commentId) {
+            if (newVote === null) {
+              const oldVote = c.votes.find(v => v.user.id === user.user.id);
+              return {
+                ...c,
+                votes: c.votes.filter(v => v.id !== oldVote?.id),
+                nrVotes: c.nrVotes - (userVotes[commentId] === 'UPVOTE' ? 1 : -1)
+              };
+            } else {
+              return {
+                ...c,
+                votes: [...c.votes, newVote],
+                nrVotes: c.nrVotes + (voteType === 'UPVOTE' ? 1 : -1)
+              };
+            }
+          }
+          return c;
+        }));
+
+        setUserVotes(prev => {
+          const newVotes = { ...prev };
+          if (newVote === null) {
+            delete newVotes[commentId];
+          } else {
+            newVotes[commentId] = voteType;
+          }
+          return newVotes;
+        });
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to add vote: ${errorText}`);
+      }
+    } catch (error) {
+      console.error('Error voting:', error);
+      alert('Error voting: ' + error.message);
+    }
+  };
+
+  const renderVoteButtons = (comment) => {
+    const userVote = userVotes[comment.id];
+    const voteCount = comment.nrVotes;
+    const currentUser = JSON.parse(localStorage.getItem('user'));
+
+    return (
+      <div className="vote-buttons">
+        <button
+          className={`vote-button ${userVote === 'UPVOTE' ? 'active' : ''}`}
+          onClick={() => handleVote(comment.id, 'UPVOTE')}
+          disabled={comment.user?.id === currentUser?.user?.id || userVote === 'DOWNVOTE'}
+        >
+          <i className="fas fa-arrow-up"></i>
+        </button>
+        <span className="vote-count">{voteCount}</span>
+        <button
+          className={`vote-button ${userVote === 'DOWNVOTE' ? 'active' : ''}`}
+          onClick={() => handleVote(comment.id, 'DOWNVOTE')}
+          disabled={comment.user?.id === currentUser?.user?.id || userVote === 'UPVOTE'}
+        >
+          <i className="fas fa-arrow-down"></i>
+        </button>
+      </div>
+    );
   };
 
   const handleAddComment = async (e) => {
@@ -91,6 +227,70 @@ function CommentModal({ open, onClose, postId, userToken, onCommentAdded }) {
     }
   };
 
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm('Are you sure you want to delete this comment?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:8081/content/${commentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${userToken}`
+        }
+      });
+
+      if (response.ok) {
+        // Remove the deleted comment from the state
+        setComments(prev => prev.filter(comment => comment.id !== commentId));
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to delete comment: ${errorText}`);
+      }
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      alert('Error deleting comment: ' + error.message);
+    }
+  };
+
+  const handleEditComment = (comment) => {
+    setEditComment({ show: true, comment, text: comment.text });
+  };
+
+  const handleEditCommentSubmit = async (e) => {
+    e.preventDefault();
+    if (!editComment.text.trim()) return;
+
+    try {
+      const response = await fetch(`http://localhost:8081/content/${editComment.comment.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...editComment.comment,
+          text: editComment.text
+        })
+      });
+
+      if (response.ok) {
+        setComments(prev => prev.map(c => 
+          c.id === editComment.comment.id 
+            ? { ...c, text: editComment.text }
+            : c
+        ));
+        setEditComment({ show: false, comment: null, text: '' });
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to edit comment: ${errorText}`);
+      }
+    } catch (error) {
+      console.error('Error editing comment:', error);
+      alert('Error editing comment: ' + error.message);
+    }
+  };
+
   if (!open) return null;
 
   return (
@@ -111,8 +311,68 @@ function CommentModal({ open, onClose, postId, userToken, onCommentAdded }) {
             <ul className="comment-list">
               {comments.map(comment => (
                 <li key={comment.id} className="comment-item">
-                  <div className="comment-user">{comment.user?.username || 'Anonim'}</div>
-                  <div className="comment-text">{comment.text}</div>
+                  <div className="comment-header">
+                    <div className="comment-user">{comment.user?.username || 'Anonim'}</div>
+                    <div className="comment-actions-buttons">
+                      {comment.user?.id === JSON.parse(localStorage.getItem('user'))?.user?.id && (
+                        <>
+                          <button
+                            className="edit-comment-button"
+                            onClick={() => handleEditComment(comment)}
+                            title="Edit comment"
+                          >
+                            <i className="fas fa-edit"></i>
+                          </button>
+                          <button
+                            className="delete-comment-button"
+                            onClick={() => handleDeleteComment(comment.id)}
+                            title="Delete comment"
+                          >
+                            <i className="fas fa-trash"></i>
+                          </button>
+                        </>
+                      )}
+                      {isAdmin && comment.user?.id !== JSON.parse(localStorage.getItem('user'))?.user?.id && (
+                        <>
+                          <button
+                            className="edit-comment-button"
+                            onClick={() => handleEditComment(comment)}
+                            title="Edit comment"
+                          >
+                            <i className="fas fa-edit"></i>
+                          </button>
+                          <button
+                            className="delete-comment-button"
+                            onClick={() => handleDeleteComment(comment.id)}
+                            title="Delete comment"
+                          >
+                            <i className="fas fa-trash"></i>
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  {editComment.show && editComment.comment.id === comment.id ? (
+                    <form onSubmit={handleEditCommentSubmit} className="edit-comment-form">
+                      <textarea
+                        value={editComment.text}
+                        onChange={(e) => setEditComment(prev => ({ ...prev, text: e.target.value }))}
+                        className="edit-comment-input"
+                      />
+                      <div className="edit-comment-buttons">
+                        <button type="submit" className="save-comment-button">Save</button>
+                        <button 
+                          type="button" 
+                          className="cancel-comment-button"
+                          onClick={() => setEditComment({ show: false, comment: null, text: '' })}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="comment-text">{comment.text}</div>
+                  )}
                   {comment.urlPhoto && (
                     <div className="comment-image-container" style={{ justifyContent: 'center' }}>
                       <img
@@ -124,7 +384,18 @@ function CommentModal({ open, onClose, postId, userToken, onCommentAdded }) {
                       />
                     </div>
                   )}
-                  <div className="comment-date">{comment.createdAt ? new Date(comment.createdAt).toLocaleString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</div>
+                  <div className="comment-actions">
+                    {renderVoteButtons(comment)}
+                    <div className="comment-date">
+                      {comment.createdAt ? new Date(comment.createdAt).toLocaleString('ro-RO', { 
+                        day: '2-digit', 
+                        month: '2-digit', 
+                        year: 'numeric', 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      }) : ''}
+                    </div>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -155,7 +426,10 @@ function CommentModal({ open, onClose, postId, userToken, onCommentAdded }) {
               <button
                 type="button"
                 className="remove-photo"
-                onClick={() => { setPhoto(null); setPhotoPreview(null); }}
+                onClick={() => {
+                  setPhoto(null);
+                  setPhotoPreview(null);
+                }}
                 tabIndex={-1}
               >
                 <i className="fas fa-times"></i>

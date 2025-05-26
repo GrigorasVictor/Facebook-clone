@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -36,6 +37,20 @@ public class UserController extends AbstractController<User, UserService> {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/photo/{imageName}")
+    public ResponseEntity<byte[]> getImage(@PathVariable String imageName) throws Exception {
+        byte[] imageBytes = userService.getStorageS3Service().getImage(imageName);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_PNG);
+        headers.setContentLength(imageBytes.length);
+
+        return new ResponseEntity<>(
+                imageBytes,
+                headers, HttpStatus.OK);
+    }
+
     @GetMapping("/me")
     public ResponseEntity<User> getCurrentUser() {
         try{
@@ -44,6 +59,24 @@ public class UserController extends AbstractController<User, UserService> {
             logger.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/photo-url/{userId}")
+    public ResponseEntity<String> getUserPhotoUrl(@PathVariable Long userId) {
+        Optional<User> user = userService.getUserRepository().findById(userId);
+        if (user.isPresent()) {
+            String urlPhoto = user.get().getUrlPhoto();
+            // Fallback pentru valori greșite
+            if (urlPhoto == null || urlPhoto.equalsIgnoreCase("url") || urlPhoto.equals("-")) {
+                // URL de placeholder (poți schimba cu orice imagine vrei)
+                return ResponseEntity.ok("https://ui-avatars.com/api/?name=User&background=random");
+            }
+            if (!(urlPhoto.startsWith("http://") || urlPhoto.startsWith("https://"))) {
+                urlPhoto = "http://localhost:8081/user/photo/" + urlPhoto;
+            }
+            return ResponseEntity.ok(urlPhoto);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     //TODO: user-ul normal n-are voie sa adauge sau sa stearga useri, update-ul numa daca este pe el insusi(din token)

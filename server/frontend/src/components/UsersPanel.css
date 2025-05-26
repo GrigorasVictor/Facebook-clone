@@ -8,6 +8,19 @@
   font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
 }
 
+@media (min-width: 1100px) {
+  .users-panel {
+    position: fixed;
+    right: 0;
+    top: 70px;
+    margin-right: 32px;
+    margin-left: 0;
+    z-index: 10;
+    height: calc(100vh - 90px);
+    overflow-y: auto;
+  }
+}
+
 .users-panel h2 {
   color: #222b45;
   font-size: 15px;
@@ -21,20 +34,25 @@
 .users-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 8px;
+  align-items: flex-start;
 }
 
 .user-card {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  padding: 14px 12px 12px 12px;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 10px 0 8px 0;
   border-radius: 12px;
   background: #f5f6fa;
   box-shadow: 0 1px 3px rgba(30,34,90,0.04);
   border: 1px solid #ececec;
-  gap: 8px;
+  gap: 4px;
   transition: box-shadow 0.2s, background 0.2s;
+  font-size: 12px;
+  width: 100%;
+  min-height: 60px;
+  justify-content: flex-start;
 }
 
 .user-card:hover {
@@ -47,6 +65,7 @@
   align-items: center;
   gap: 12px;
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 .user-avatar {
@@ -78,11 +97,30 @@
   font-size: 15px;
 }
 
+.user-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.user-details-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
 .user-details h3 {
   margin: 0 0 2px 0;
   color: #222b45;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+  width: auto;
+  font-family: 'Segoe UI', Arial, sans-serif;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -92,47 +130,44 @@
   margin: 0;
   color: #8a8d91;
   font-size: 12px;
+  text-align: left;
+  width: auto;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-family: 'Segoe UI', Arial, sans-serif;
 }
 
 .add-friend-btn {
-  align-self: flex-end;
+  align-self: flex-start;
   margin-left: 0;
-  margin-top: 6px;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
+  margin-top: -10px;
+  padding: 7px 18px;
+  border: 1.5px solid #1877f2;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-  background: linear-gradient(90deg, #e3eafc 60%, #eafbe7 100%);
-  color: #2d3a4a;
-  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
-  box-shadow: 0 1px 3px rgba(30,34,90,0.07);
+  background: #fff;
+  color: #1877f2;
+  transition: background 0.18s, border 0.18s, color 0.18s;
+  box-shadow: none;
   white-space: nowrap;
   position: relative;
   z-index: 1;
-  border: 1px solid #e0e0e0;
 }
 
 .add-friend-btn:hover:not(:disabled) {
-  background: linear-gradient(90deg, #dbe6fa 60%, #e2f7e1 100%);
-  transform: translateY(-1px) scale(1.03);
-  box-shadow: 0 2px 8px rgba(30,34,90,0.10);
+  background: #f0f2f5;
+  color: #166fe5;
+  border-color: #166fe5;
 }
 
-.add-friend-btn.sent {
-  background: #f2f2f2;
-  color: #b0b3b8;
+.add-friend-btn:disabled, .add-friend-btn.sent {
+  background: #e4e6eb !important;
+  color: #65676b !important;
+  border-color: #ccd0d5 !important;
   cursor: default;
-  border: 1px solid #e0e0e0;
-}
-
-.add-friend-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.7;
 }
 
 .users-panel p {

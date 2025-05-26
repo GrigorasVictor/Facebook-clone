@@ -56,7 +56,14 @@ function App() {
         />
         <Route path="/forgot" element={<ForgotPassword />} />
         <Route path="/reset" element={<ResetPassword />} />
-        <Route path="/admin-auth" element={<AdminAuthPanel />} />
+        <Route
+          path="/admin-auth"
+          element={
+            <PrivateRoute>
+              <AdminAuthPanel />
+            </PrivateRoute>
+          }
+        />
       </Routes>
     </Router>
   );

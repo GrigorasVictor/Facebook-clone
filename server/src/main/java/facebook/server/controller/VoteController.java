@@ -6,8 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/vote")
@@ -18,6 +17,7 @@ public class VoteController extends AbstractController<Vote, VoteService> {
     VoteService voteService;
 
     @Override
+    @PostMapping("/add")
     public ResponseEntity<Vote> add(Vote newEntry) {
         System.out.println(newEntry);
         try {
@@ -29,12 +29,13 @@ public class VoteController extends AbstractController<Vote, VoteService> {
     }
 
     @Override
-    public ResponseEntity<Vote> delete(Long id) {
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Vote> delete(@PathVariable Long id) {
         try {
             voteService.deleteById(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            logger.error("Error deleting vote with id {}: {}", e.getMessage(), id);
+            logger.error("Error deleting vote with id {}: {}", id, e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }

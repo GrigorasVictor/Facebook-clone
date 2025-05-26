@@ -26,7 +26,7 @@ function AdminAuthPanel() {
     setError(null);
     try {
       const currentUser = AuthService.getCurrentUser();
-      const response = await fetch('http://localhost:8081/user', {
+      const response = await fetch('http://localhost:8080/user', {
         headers: {
           'Authorization': `Bearer ${currentUser?.token}`
         }

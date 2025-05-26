@@ -36,7 +36,7 @@ public class UserController extends AbstractController<UserAuthentification, Use
             Long id = Long.valueOf(idString.trim());
             logger.info("User ID to ban: {}", id);
             userAuthentificationService.banUser(id);
-            emailService.sendBanEmail("victorandrei201112@gmail.com");
+            emailService.sendBanEmail("bogdanadrian.ciupe@gmail.com");
             smsService.sendSms("+18777804236", "You have been banned from Facebook application!");
             return ResponseEntity.ok().build();
         } catch (Exception e) {
@@ -51,7 +51,7 @@ public class UserController extends AbstractController<UserAuthentification, Use
             Long id = Long.valueOf(idString.trim());
             logger.info("User ID to unban: {}", id);
             userAuthentificationService.unbanUser(id);
-            emailService.sendUnbanEmail("victorandrei201112@gmail.com");
+            emailService.sendUnbanEmail("bogdanadrian.ciupe@gmail.com");
             smsService.sendSms("+18777804236", "You have been un2banned from Facebook application!");
             return ResponseEntity.ok().build();
         } catch (Exception e) {

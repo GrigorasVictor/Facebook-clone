@@ -145,13 +145,28 @@ public class ContentService extends AbstractService<Content, ContentRepository> 
         if(repository.findById(id).isEmpty())
             throw new RuntimeException("Content not found");
 
-
         Content target = repository.findById(id).get();
         target.setText(entity.getText());
         target.setTitle(entity.getTitle());
-        target.setTags(entity.getTags());
+        
+        // Handle tags properly
+        List<Tag> updatedTags = new ArrayList<>();
+        for (Tag tagItem : entity.getTags()) {
+            if (tagItem.getName() != null && !tagItem.getName().isEmpty()) {
+                Tag tag = tagService.findByNameOrCreate(tagItem.getName());
+                updatedTags.add(tag);
+            }
+        }
+        target.setTags(updatedTags);
+        
         target.setCreatedAt(LocalDateTime.now());
         target.setUser(user);
+        // Keep the existing photo URL if no new photo is provided
+        if (entity.getUrlPhoto() == null) {
+            target.setUrlPhoto(target.getUrlPhoto());
+        } else {
+            target.setUrlPhoto(entity.getUrlPhoto());
+        }
 
         return repository.save(target);
     }

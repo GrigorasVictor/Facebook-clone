@@ -141,4 +141,16 @@ input:focus {
   background-color: #e6ffec;
   color: #116329;
   border: 1px solid #e6ffec;
+}
+
+.banned-message {
+  background-color: #ffeaea;
+  color: #dc3545;
+  padding: 12px;
+  border-radius: 6px;
+  margin: 12px 0;
+  font-size: 14px;
+  text-align: center;
+  border: 1px solid #dc3545;
+  font-weight: 500;
 } 

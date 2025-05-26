@@ -9,6 +9,7 @@ function UsersPanel() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [avatarUrls, setAvatarUrls] = useState({});
 
   useEffect(() => {
     const currentUser = AuthService.getCurrentUser();
@@ -19,6 +20,36 @@ function UsersPanel() {
     }
     fetchUsers(currentUser);
   }, []);
+
+  const fetchAvatars = async (usersData) => {
+    const user = AuthService.getCurrentUser();
+    if (!user?.token) return;
+
+    const newAvatarUrls = {};
+    await Promise.all(usersData.map(async (u) => {
+      if (u && u.url_photo) {
+        if (u.url_photo.startsWith('http://') || u.url_photo.startsWith('https://')) {
+          newAvatarUrls[u.id] = u.url_photo;
+        } else {
+          try {
+            const response = await fetch(`http://localhost:8081/user/photo/${u.url_photo}`, {
+              headers: {
+                'Authorization': `Bearer ${user.token}`
+              }
+            });
+            if (response.ok) {
+              const blob = await response.blob();
+              newAvatarUrls[u.id] = URL.createObjectURL(blob);
+            }
+          } catch (err) {
+            console.error('Error fetching avatar:', err);
+            newAvatarUrls[u.id] = null;
+          }
+        }
+      }
+    }));
+    setAvatarUrls(newAvatarUrls);
+  };
 
   const fetchUsers = async (currentUser) => {
     setLoading(true);
@@ -51,6 +82,9 @@ function UsersPanel() {
       }
       const allUsers = await usersResponse.json();
 
+      console.log('ALL USERS:', allUsers);
+      allUsers.forEach(u => console.log(`User: ${u.id}, username: ${u.username}, url_photo: ${u.url_photo}`));
+
       // 3. Ia prietenii userului curent
       const friendsResponse = await fetch('http://localhost:8081/friend/mutual', {
         method: 'GET',
@@ -75,7 +109,7 @@ function UsersPanel() {
         }
       });
       if (!pendingResponse.ok) {
-        const errorData = await pendingResponse.text();
+        const errorData = await friendsResponse.text();
         throw new Error(errorData || 'Eroare la încărcarea pending requests');
       }
       const pending = await pendingResponse.json();
@@ -89,6 +123,8 @@ function UsersPanel() {
           requestSent: pendingIds.includes(user.id)
         }));
       setUsers(filteredUsers);
+      await fetchAvatars(filteredUsers);
+
     } catch (err) {
       console.error('Error fetching users:', err);
       setError(err.message || "A apărut o eroare la încărcarea utilizatorilor. Vă rugăm să încercați din nou.");
@@ -135,7 +171,7 @@ function UsersPanel() {
 
   return (
     <div className="users-panel">
-      <h2>Persoane pe care le poți cunoaște</h2>
+      <h2>People You May Know</h2>
       <div className="users-list">
         {users.length === 0 ? (
           <p>Nu s-au găsit utilizatori</p>
@@ -144,8 +180,8 @@ function UsersPanel() {
             <div key={user.id} className={`user-card${user.requestSent ? ' pending' : ''}`}>
               <div className="user-info">
                 <div className="user-avatar">
-                  {user.url_photo ? (
-                    <img src={user.url_photo} alt={user.username} />
+                  {avatarUrls[user.id] ? (
+                    <img src={avatarUrls[user.id]} alt={user.username} />
                   ) : (
                     <div className="avatar-placeholder">
                       <i className="fas fa-user"></i>
@@ -158,11 +194,11 @@ function UsersPanel() {
                 </div>
               </div>
               <button
-                className={`add-friend-btn ${user.requestSent ? 'sent' : ''}`}
+                className="add-friend-btn" 
                 onClick={() => handleAddFriend(user.id)}
                 disabled={user.requestSent}
               >
-                {user.requestSent ? 'Cerere trimisă' : 'Adaugă prieten'}
+                {user.requestSent ? 'Request Sent' : 'Add Friend'}
               </button>
             </div>
           ))

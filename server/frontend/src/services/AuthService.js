@@ -18,11 +18,6 @@ class AuthService {
       console.log('Login response:', response.data);
       
       if (response.data.statusCode === 200 && response.data.token) {
-        // Dacă backend-ul va include userul direct în răspuns, poți folosi direct:
-        // const userObj = { ...response.data };
-        // localStorage.setItem('user', JSON.stringify(userObj));
-        // return userObj;
-        // Acum, facem request suplimentar la /user/me:
         const userResponse = await fetch('http://localhost:8081/user/me', {
           headers: { 'Authorization': `Bearer ${response.data.token}` }
         });
@@ -47,12 +42,16 @@ class AuthService {
       });
       
       // Handle specific error cases
-      if (error.response?.status === 401) {
+      if (error.response?.data?.message === "User is banned!") {
+        console.log('Caught banned user message');
+        throw new Error('Your account has been banned. Please contact the administrator for more information.');
+      } else if (error.response?.status === 401) {
         throw new Error('Invalid email or password');
       } else if (error.response?.status === 404) {
         throw new Error('Account not found');
       } else if (error.response?.status === 403) {
-        throw new Error('Contul tău este banat!');
+        console.log('Caught 403 status');
+        throw new Error('Your account has been banned. Please contact the administrator for more information.');
       } else if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
       } else {
