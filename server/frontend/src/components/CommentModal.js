@@ -16,6 +16,7 @@ function CommentModal({ open, onClose, postId, userToken, onCommentAdded }) {
   });
   const [isAdmin, setIsAdmin] = useState(false);
   const [editComment, setEditComment] = useState({ show: false, comment: null, text: '' });
+  const [avatarUrls, setAvatarUrls] = useState({});
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -44,6 +45,36 @@ function CommentModal({ open, onClose, postId, userToken, onCommentAdded }) {
     localStorage.setItem('commentVotes', JSON.stringify(userVotes));
   }, [userVotes]);
 
+  const fetchAvatars = async (commentsData) => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user?.token) return;
+
+    const newAvatarUrls = {};
+    await Promise.all(commentsData.map(async (comment) => {
+      if (comment.user && comment.user.url_photo) {
+        if (comment.user.url_photo.startsWith('http://') || comment.user.url_photo.startsWith('https://')) {
+          newAvatarUrls[comment.id] = comment.user.url_photo;
+        } else {
+          try {
+            const response = await fetch(`http://localhost:8081/user/photo/${comment.user.url_photo}`, {
+              headers: {
+                'Authorization': `Bearer ${user.token}`
+              }
+            });
+            if (response.ok) {
+              const blob = await response.blob();
+              newAvatarUrls[comment.id] = URL.createObjectURL(blob);
+            }
+          } catch (err) {
+            console.error('Error fetching avatar:', err);
+            newAvatarUrls[comment.id] = null;
+          }
+        }
+      }
+    }));
+    setAvatarUrls(newAvatarUrls);
+  };
+
   const fetchComments = async () => {
     setLoading(true);
     setError(null);
@@ -69,6 +100,9 @@ function CommentModal({ open, onClose, postId, userToken, onCommentAdded }) {
         }
         return new Date(b.createdAt) - new Date(a.createdAt);
       }));
+
+      // Fetch avatars for all comments
+      await fetchAvatars(data);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -262,16 +296,21 @@ function CommentModal({ open, onClose, postId, userToken, onCommentAdded }) {
     if (!editComment.text.trim()) return;
 
     try {
+      const payload = {
+        id: editComment.comment.id,
+        text: editComment.text,
+        user: editComment.comment.user ? { id: editComment.comment.user.id } : undefined,
+        parentContentId: editComment.comment.parentContentId || postId,
+        status: editComment.comment.status || 'active',
+        typeContent: false
+      };
       const response = await fetch(`http://localhost:8081/content/${editComment.comment.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${userToken}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          ...editComment.comment,
-          text: editComment.text
-        })
+        body: JSON.stringify(payload)
       });
 
       if (response.ok) {
@@ -312,7 +351,18 @@ function CommentModal({ open, onClose, postId, userToken, onCommentAdded }) {
               {comments.map(comment => (
                 <li key={comment.id} className="comment-item">
                   <div className="comment-header">
-                    <div className="comment-user">{comment.user?.username || 'Anonim'}</div>
+                    <div className="comment-user-info">
+                      <div className="comment-user-avatar">
+                        {avatarUrls[comment.id] ? (
+                          <img src={avatarUrls[comment.id]} alt={comment.user?.username} />
+                        ) : (
+                          <div className="avatar-placeholder">
+                            <i className="fas fa-user"></i>
+                          </div>
+                        )}
+                      </div>
+                      <div className="comment-user">{comment.user?.username || 'Anonim'}</div>
+                    </div>
                     <div className="comment-actions-buttons">
                       {comment.user?.id === JSON.parse(localStorage.getItem('user'))?.user?.id && (
                         <>
@@ -374,12 +424,11 @@ function CommentModal({ open, onClose, postId, userToken, onCommentAdded }) {
                     <div className="comment-text">{comment.text}</div>
                   )}
                   {comment.urlPhoto && (
-                    <div className="comment-image-container" style={{ justifyContent: 'center' }}>
+                    <div className="comment-image-container">
                       <img
                         src={comment.urlPhoto}
                         alt="Comentariu"
                         className="comment-image"
-                        style={{ cursor: 'pointer' }}
                         onClick={() => setImageModal({ open: true, src: comment.urlPhoto })}
                       />
                     </div>
@@ -402,14 +451,6 @@ function CommentModal({ open, onClose, postId, userToken, onCommentAdded }) {
           )}
         </div>
         <form className="comment-form" onSubmit={handleAddComment}>
-          <input
-            type="text"
-            placeholder="Scrie un comentariu..."
-            value={newComment}
-            onChange={e => setNewComment(e.target.value)}
-            disabled={submitting}
-            maxLength={300}
-          />
           <label className="comment-photo-upload">
             <input
               type="file"
@@ -420,6 +461,18 @@ function CommentModal({ open, onClose, postId, userToken, onCommentAdded }) {
             />
             <span role="img" aria-label="Adaugă poză" style={{ cursor: 'pointer', fontSize: 18, color: photoPreview ? '#1877f2' : '#65676b' }}>📷</span>
           </label>
+          <input
+            type="text"
+            placeholder="Scrie un comentariu..."
+            value={newComment}
+            onChange={e => setNewComment(e.target.value)}
+            disabled={submitting}
+            maxLength={300}
+            className="comment-input"
+          />
+          <button type="submit" disabled={submitting || !newComment.trim()} className="send-comment-btn">
+            {submitting ? 'Se trimite...' : 'Trimite'}
+          </button>
           {photoPreview && (
             <div className="comment-photo-preview">
               <img src={photoPreview} alt="Preview" />
@@ -436,9 +489,6 @@ function CommentModal({ open, onClose, postId, userToken, onCommentAdded }) {
               </button>
             </div>
           )}
-          <button type="submit" disabled={submitting || !newComment.trim()}>
-            {submitting ? 'Se trimite...' : 'Trimite'}
-          </button>
         </form>
       </div>
       {imageModal.open && (

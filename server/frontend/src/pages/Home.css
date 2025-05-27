@@ -61,6 +61,7 @@ body {
 
 /* --- CREATE POST BUTTON --- */
 .create-post-button-container {
+  margin-top: 40px;
   margin-bottom: 24px;
 }
 .create-post-button {
@@ -513,4 +514,104 @@ body {
     margin-left: 0;
     margin-top: 24px;
   }
+}
+
+.post-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e4e6eb;
+}
+
+.vote-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vote-button {
+  background: #fff;
+  border: 1.5px solid #1877f2;
+  color: #1877f2;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(24,119,242,0.07);
+}
+
+.vote-button:hover:not(:disabled) {
+  background: #f0f2f5;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(24,119,242,0.13);
+}
+
+.vote-button.active {
+  background: #1877f2;
+  color: #fff;
+}
+
+.vote-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.vote-count {
+  font-size: 15px;
+  color: #222b45;
+  font-weight: 600;
+  min-width: 24px;
+  text-align: center;
+}
+
+.post-comment-btn {
+  background: #fff;
+  color: #65676b;
+  border: 1.5px solid #e4e6eb;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  cursor: pointer;
+  transition: border 0.18s, color 0.18s;
+  box-shadow: 0 2px 8px rgba(24,119,242,0.07);
+  padding: 0;
+  position: relative;
+}
+
+.post-comment-btn:hover:not(:disabled) {
+  border-color: #1877f2;
+  color: #1877f2;
+}
+
+.comment-count {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  background: #e53935;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  box-shadow: 0 1px 4px rgba(229,57,53,0.15);
+  z-index: 2;
+  pointer-events: none;
 } 

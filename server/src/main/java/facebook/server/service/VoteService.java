@@ -64,6 +64,9 @@ public class VoteService extends AbstractService<Vote, VoteRepository>{
             User contentUser = content.getUser();
             float score = content.isTypeContent() ? -1.5f : -2.5f;
             userService.updateScore(contentUser, score);
+            if(content.isTypeContent() == false){
+                userService.updateScore(user, -1.5f);
+            }
         }
 
         content.addVote(vote);

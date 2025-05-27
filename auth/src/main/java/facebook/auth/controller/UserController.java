@@ -1,5 +1,6 @@
 package facebook.auth.controller;
 
+import facebook.auth.entity.User;
 import facebook.auth.entity.UserAuthentification;
 import facebook.auth.service.EmailService;
 import facebook.auth.service.SmsService;
@@ -34,9 +35,11 @@ public class UserController extends AbstractController<UserAuthentification, Use
     public ResponseEntity banUser(@RequestBody String idString) {
         try {
             Long id = Long.valueOf(idString.trim());
+            UserAuthentification user = userAuthentificationService.getUserAuthentificationRepository()
+                    .findById(id).get();
             logger.info("User ID to ban: {}", id);
             userAuthentificationService.banUser(id);
-            emailService.sendBanEmail("bogdanadrian.ciupe@gmail.com");
+            emailService.sendBanEmail(user.getEmail());
             smsService.sendSms("+18777804236", "You have been banned from Facebook application!");
             return ResponseEntity.ok().build();
         } catch (Exception e) {
@@ -44,14 +47,15 @@ public class UserController extends AbstractController<UserAuthentification, Use
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
     @PostMapping("/unban")
     public ResponseEntity unbanUser(@RequestBody String idString) {
         try {
             Long id = Long.valueOf(idString.trim());
+            UserAuthentification user = userAuthentificationService.getUserAuthentificationRepository()
+                    .findById(id).get();
             logger.info("User ID to unban: {}", id);
             userAuthentificationService.unbanUser(id);
-            emailService.sendUnbanEmail("bogdanadrian.ciupe@gmail.com");
+            emailService.sendUnbanEmail(user.getEmail());
             smsService.sendSms("+18777804236", "You have been un2banned from Facebook application!");
             return ResponseEntity.ok().build();
         } catch (Exception e) {

@@ -746,13 +746,16 @@ function Home() {
                     <img src={post.urlPhoto} alt="Post" className="post-image" />
                   </div>
                 )}
-                    {renderVoteButtons(post)}
-                    <button
-                      className="post-comment-btn"
-                      onClick={() => { setActivePostId(post.id); setCommentModalOpen(true); }}
-                    >
-                      <i className="fas fa-comment-alt"></i> Comentarii ({post.nrComments})
-                    </button>
+                <div className="post-actions-row">
+                  {renderVoteButtons(post)}
+                  <button
+                    className="post-comment-btn"
+                    onClick={() => { setActivePostId(post.id); setCommentModalOpen(true); }}
+                  >
+                    <i className="fas fa-comment-alt"></i>
+                    <span className="comment-count">{post.nrComments}</span>
+                  </button>
+                </div>
               </div>
             </div>
           ))}
