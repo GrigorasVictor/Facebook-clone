@@ -101,7 +101,8 @@ public class UserAuthentificationService extends AbstractService<UserAuthentific
                     .withToken(jwt)
                     .withRefreshToken(refreshToken)
                     .withExpirationTime("24Hrs")
-                    .withMessage("Successfully logged in");
+                    .withMessage("Successfully logged in")
+                    .withUser(user.toUser());
         }catch (Exception e) {
             response.withStatusCode(500)
                     .withMessage(e.getMessage());

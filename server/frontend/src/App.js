@@ -8,6 +8,7 @@ import Friends from './pages/Friends';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import AdminAuthPanel from './pages/AdminAuthPanel';
+
 import Navbar from './components/Navbar';
 import AuthService from './services/AuthService';
 import './App.css';

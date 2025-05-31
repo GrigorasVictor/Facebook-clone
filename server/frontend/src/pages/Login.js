@@ -35,6 +35,7 @@ function Login() {
       }
     } catch (err) {
       console.log('Login error caught:', err.message);
+
       setError(err.message || 'An error occurred during login');
     } finally {
       setLoading(false);

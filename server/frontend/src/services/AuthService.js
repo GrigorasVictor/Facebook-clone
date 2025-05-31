@@ -31,6 +31,7 @@ class AuthService {
         };
         localStorage.setItem('user', JSON.stringify(userObj));
         return userObj;
+
       } else {
         throw new Error(response.data.message || 'Login failed');
       }
@@ -52,6 +53,7 @@ class AuthService {
       } else if (error.response?.status === 403) {
         console.log('Caught 403 status');
         throw new Error('Your account has been banned. Please contact the administrator for more information.');
+
       } else if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
       } else {
@@ -67,6 +69,7 @@ class AuthService {
   async register(username, email, password, phoneNumber = "") {
     try {
       console.log('Sending register request:', { username, email, password, phoneNumber });
+
       const response = await axios.post(API_URL + 'register', {
         username,
         email,

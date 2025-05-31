@@ -146,6 +146,7 @@ function Register() {
             value={formData.phoneNumber}
             onChange={handleChange}
             disabled={loading}
+
           />
           
           {error && <div className="error-message">{error}</div>}

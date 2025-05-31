@@ -96,6 +96,7 @@ function Profile() {
       setPreviewUrl(null);
       // Optionally set an error if the file is not an image
       // setError("Please select a valid image file.");
+
     }
   };
 
@@ -228,7 +229,8 @@ function Profile() {
     }
   } else {
     console.log("userInfo.created_at is null or undefined.");
-  }
+
+ }
 
   return (
     <div className="profile-container">
@@ -266,6 +268,7 @@ function Profile() {
             {selectedFile && (
               <button onClick={handleUpload} disabled={isUploading || !previewUrl} className="save-photo-button">
                 {isUploading ? 'Saving...' : 'Save Photo'}
+
               </button>
             )}
           </div>

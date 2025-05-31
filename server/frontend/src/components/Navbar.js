@@ -38,6 +38,7 @@ function Navbar() {
             <i className="fas fa-users"></i>
             <span>Friends</span>
           </Link>
+
           <Link to="/profile" className="nav-item">
             <i className="fas fa-user"></i>
             <span>Profile</span>

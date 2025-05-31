@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AuthService from '../services/AuthService';
 import UsersPanel from '../components/UsersPanel';
 import CommentModal from '../components/CommentModal';
+
 import './Home.css';
 import './EditPost.css';
 
@@ -186,6 +187,7 @@ function Home() {
             console.error('Error fetching avatar:', err);
           newAvatarUrls[post.id] = null;
           }
+
         }
       }
     }));
@@ -237,7 +239,6 @@ function Home() {
   const removeTag = (tagToRemove) => {
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -289,6 +290,7 @@ function Home() {
         setTags([]);
         setTagInput('');
         fetchPosts(0, true);
+
       } else {
         const errorText = await response.text();
         console.error('Failed to create post:', errorText);
@@ -617,6 +619,7 @@ function Home() {
   return (
     <div className="home-container">
       <div className="home-main-content">
+
       <div className="feed-container">
         <div className="create-post-button-container">
           <button className="create-post-button" onClick={() => setShowModal(true)}>
@@ -624,7 +627,6 @@ function Home() {
             Create Post
           </button>
         </div>
-
         <div className="filter-container">
           <div className="search-section">
             <input
@@ -880,7 +882,6 @@ function Home() {
           </div>
         </div>
       )}
-
       {editModal.show && (
         <div className="modal-overlay">
           <div className="modal-content">
