@@ -74,4 +74,15 @@ public class ContentController extends AbstractController<Content, ContentServic
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }
+
+    @GetMapping("/{id}/comments")
+    public ResponseEntity<List<Content>> getComments(@PathVariable Long id) {
+        try {
+            List<Content> comments = contentService.getCommentsForContent(id);
+            return new ResponseEntity<>(comments, HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("Error while getting comments: {}", e.getMessage(), e);
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+    }
 }

@@ -94,10 +94,15 @@ public class UserService extends AbstractService<User, AbstractRepository<User>>
         return user;
     }
 
-    public float updateScore(User user, float score){
-        user.setScore(user.getScore() + score);
-        userRepository.save(user);
-        return user.getScore();
+    @Transactional
+    public void updateScore(User user, float score) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
+        User updatedUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        updatedUser.setScore(updatedUser.getScore() + score);
+        userRepository.save(updatedUser);
     }
 
     public void banUser(Long id) throws Exception {

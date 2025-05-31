@@ -4,6 +4,11 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
+import Friends from './pages/Friends';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import AdminAuthPanel from './pages/AdminAuthPanel';
+
 import Navbar from './components/Navbar';
 import AuthService from './services/AuthService';
 import './App.css';
@@ -39,6 +44,24 @@ function App() {
           element={
             <PrivateRoute>
               <Profile />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/friends"
+          element={
+            <PrivateRoute>
+              <Friends />
+            </PrivateRoute>
+          }
+        />
+        <Route path="/forgot" element={<ForgotPassword />} />
+        <Route path="/reset" element={<ResetPassword />} />
+        <Route
+          path="/admin-auth"
+          element={
+            <PrivateRoute>
+              <AdminAuthPanel />
             </PrivateRoute>
           }
         />

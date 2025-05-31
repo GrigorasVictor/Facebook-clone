@@ -14,7 +14,9 @@ public class UserAuthentificationBuilder {
         user.setEmail("default@example.com");
         user.setPassword("securepassword");
         user.setRole("USER");
-        user.setCreatedAt(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+        user.setCreatedAt(LocalDateTime.now().toString());
+        user.setPhoneNumber("0000000000");
+
     }
 
     public UserAuthentificationBuilder withUsername(String username) {
@@ -34,6 +36,11 @@ public class UserAuthentificationBuilder {
 
     public UserAuthentificationBuilder withRole(String role) {
         user.setRole(role);
+        return this;
+    }
+
+    public UserAuthentificationBuilder withPhoneNumber(String phoneNumber) {
+        user.setPhoneNumber(phoneNumber);
         return this;
     }
 

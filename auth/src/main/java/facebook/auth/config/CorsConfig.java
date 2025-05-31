@@ -13,19 +13,19 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        
+
         // Allow all origins for development
         config.addAllowedOrigin("http://localhost:3000");
-        
+
         // Allow all HTTP methods
         config.addAllowedMethod("*");
-        
+
         // Allow all headers
         config.addAllowedHeader("*");
-        
+
         // Allow credentials
         config.setAllowCredentials(true);
-        
+
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }

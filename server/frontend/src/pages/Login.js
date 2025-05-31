@@ -31,9 +31,11 @@ function Login() {
     try {
       const response = await AuthService.login(email, password);
       if (response) {
-      navigate('/');
+        navigate('/');
       }
     } catch (err) {
+      console.log('Login error caught:', err.message);
+
       setError(err.message || 'An error occurred during login');
     } finally {
       setLoading(false);
@@ -62,7 +64,7 @@ function Login() {
             required
           />
           {error && (
-            <div className={`message ${error.includes('successful') ? 'success-message' : 'error-message'}`}>
+            <div className={`message ${error.includes('banned') ? 'banned-message' : error.includes('successful') ? 'success-message' : 'error-message'}`}>
               {error}
             </div>
           )}
@@ -73,8 +75,8 @@ function Login() {
           >
             {loading ? 'Logging in...' : 'Log In'}
           </button>
-          <div className="forgot-password">
-            <a href="/forgot-password">Forgotten password?</a>
+          <div className="forgot-link">
+            <a href="/forgot">Forgot password?</a>
           </div>
           <div className="divider">
             <span>or</span>

@@ -12,6 +12,10 @@ function Navbar() {
     navigate('/login');
   };
 
+  const isAdmin = user && user.user && user.user.role === 'ADMIN';
+  console.log('user:', user);
+  console.log('isAdmin:', isAdmin);
+
   if (!user) {
     return null;
   }
@@ -30,10 +34,21 @@ function Navbar() {
             <i className="fas fa-home"></i>
             <span>Home</span>
           </Link>
+          <Link to="/friends" className="nav-item">
+            <i className="fas fa-users"></i>
+            <span>Friends</span>
+          </Link>
+
           <Link to="/profile" className="nav-item">
             <i className="fas fa-user"></i>
             <span>Profile</span>
           </Link>
+          {isAdmin && (
+            <Link to="/admin-auth" className="nav-item">
+              <i className="fas fa-user-shield"></i>
+              <span>Admin Auth</span>
+            </Link>
+          )}
           <div className="nav-item" onClick={handleLogout}>
             <i className="fas fa-sign-out-alt"></i>
             <span>Logout</span>

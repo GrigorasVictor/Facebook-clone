@@ -19,21 +19,27 @@ public class Friend {
     @Column(name = "friend_id")
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id_1", insertable = false, updatable = false)
+    @OneToOne
+    @JoinColumn(name = "user_id_1")
     @JsonProperty("user_1")
     private User user1;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id_2", insertable = false, updatable = false)
+    @OneToOne
+    @JoinColumn(name = "user_id_2")
     @JsonProperty("user_2")
     private User user2;
 
-    @Column(name = "status1") // it should be nullable = false, but we need to refactor the entire database
-    @JsonProperty("status1")
-    private boolean status;
+    @Column(name = "status1")
+    @Enumerated(EnumType.STRING)
+    private FriendshipStatus user1Status = FriendshipStatus.PENDING;
 
-    @Column(name = "status2") // it should be nullable = false, but we need to refactor the entire database
-    @JsonProperty("status2")
-    private boolean status2;
+    @Column(name = "status2")
+    @Enumerated(EnumType.STRING)
+    private FriendshipStatus user2Status = FriendshipStatus.PENDING;
+
+    public enum FriendshipStatus {
+        PENDING,
+        ACCEPTED,
+        REJECTED
+    }
 }

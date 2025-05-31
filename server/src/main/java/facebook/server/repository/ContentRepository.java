@@ -9,5 +9,6 @@ import java.util.List;
 
 @Repository
 public interface ContentRepository extends AbstractRepository<Content> {
-    Page<Content> findAll(Pageable pageable);
+    Page<Content> findAllByTypeContentIsTrue(Pageable pageable);
+    List<Content> findByParentContentId(Long parentContentId);
 }
